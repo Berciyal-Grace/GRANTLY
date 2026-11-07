@@ -439,6 +439,20 @@
     .toast { position: fixed; right: 16px; bottom: 16px; z-index: 60; max-width: 360px; background: var(--white); border: 1px solid rgba(30, 58, 47, .2); border-radius: 10px; padding: 12px 16px; box-shadow: 0 8px 24px rgba(43, 33, 24, .15); font-size: 14px; }
     .toast.warn { background: var(--warn-bg); border-color: rgba(180, 115, 24, .4); color: #7A4D0F; }
     @media (max-width: 640px) { .toast { left: 16px; right: 16px; max-width: none; } }
+
+    /* ---------- GRANTLY intelligence tools ---------- */
+    .insight-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .match-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid var(--line); }
+    .match-row:last-child { border-bottom:0; }
+    .criteria-list { display:grid; gap:0; margin-top:10px; }
+    .criteria-item { display:flex; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); font-size:13px; }
+    .criteria-item:last-child { border-bottom:0; }
+    .sim-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .sim-result { border-left:3px solid var(--forest); padding:12px 16px; background:var(--canvas-low); margin-top:12px; }
+    .doc-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+    .doc-summary > div { padding:15px; border:1px solid var(--line); background:var(--white); }
+    .tool-intro { max-width:760px; color:var(--cocoa); margin-top:8px; }
+    @media(max-width:760px) { .insight-grid,.sim-controls { grid-template-columns:1fr; } .doc-summary { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -762,8 +776,8 @@ const Empty = ({ title, text, action }) => (
    4. APP SHELL
    ========================================================= */
 const NAV = [
-  { group: 'Dossier & Exploration', items: [['/dashboard', 'Overview / Dashboard'], ['/discover', 'Discover Scholarships'], ['/scheme/reliance', 'Scholarship Details']] },
-  { group: 'Operational Pipeline', items: [['/documents', 'Document Readiness Centre'], ['/applications', 'My Applications'], ['/radar', 'Opportunity Radar & Shortlist']] },
+  { group: 'Dossier & Exploration', items: [['/dashboard', 'Overview / Dashboard'], ['/discover', 'Discover Scholarships'], ['/matches', 'Smart Scholarship Match'], ['/simulator', 'What-If Simulator'], ['/scheme/reliance', 'Scholarship Details']] },
+  { group: 'Operational Pipeline', items: [['/documents', 'Document Readiness Scanner'], ['/applications', 'My Applications'], ['/radar', 'Opportunity Radar & Shortlist']] },
   { group: 'Advisory Intelligence', items: [['/ask', 'Ask GRANTLY']] }
 ];
 
@@ -1725,8 +1739,8 @@ function Documents() {
     <div>
       <PageHead
         eyebrow={`Pre-audit clearance · AY ${acLabel()}`}
-        title="Document Readiness Centre"
-        subtitle="Upload certificates, track their issue and expiry dates, and check formatting before you submit to any portal."
+        title="Document Readiness Scanner"
+        subtitle="Upload certificates, track expiry dates, and see which documents are ready, missing or need attention before you apply."
       />
 
       <div className="doc-stats">
@@ -1739,6 +1753,8 @@ function Documents() {
         <Card><p className="stat-label">Needs attention</p><p className="stat-value warn-text">{counts.attention}</p></Card>
         <Card><p className="stat-label">Missing (required)</p><p className="stat-value bad-text">{counts.missing}</p></Card>
       </div>
+
+      <div className="banner mt">Your checklist compares uploaded files with the document requirements in GRANTLY’s sample scholarship catalogue. It checks file details and dates only — it does not verify document authenticity.</div>
 
       <div className="split mt-lg">
         <Card>
@@ -1808,7 +1824,7 @@ function Documents() {
       </div>
 
       <Card className="mt-lg">
-        <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Required documents across all scholarships</p>
+        <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Your document readiness checklist</p>
         <div className="mini-cards mt">
           {latestRows.map(r => (
             <div key={r.type} className="mini-card">
@@ -2216,6 +2232,79 @@ function Ask() {
 }
 
 /* =========================================================
+   14. REACT INTELLIGENCE FEATURES
+   ========================================================= */
+function SmartMatchCenter() {
+  const { data } = useApp();
+  const p = data.profile;
+  const rows = SCHEMES.map(s => ({ scheme:s, result:eligibility(s,p), diagnosis:diagnose(s,p,data.certs) }))
+    .sort((a,b) => b.result.metCount-a.result.metCount || a.scheme.deadline.localeCompare(b.scheme.deadline));
+  return <div>
+    <PageHead eyebrow="Personalized scholarship intelligence" title="Smart Scholarship Match" subtitle="See which published sample opportunities align with the details in your student profile — and understand every requirement." actions={<LinkBtn href="#/onboarding" variant="ghost">Update profile</LinkBtn>} />
+    <div className="banner">Matching uses your saved profile. A match is a screening aid, not a guarantee of selection. Always confirm current rules with the official provider.</div>
+    <div className="stack mt-lg" style={{'--gap':'16px'}}>
+      {rows.map(({scheme:s,result:r,diagnosis:d}) => <Card key={s.id}>
+        <div className="between row" style={{alignItems:'flex-start',gap:18}}>
+          <div style={{minWidth:0}}><div className="tag-row"><Badge tone={r.metCount===r.checks.length?'ok':'warn'}>{r.metCount===r.checks.length?'All listed checks met':`${r.metCount} of ${r.checks.length} checks met`}</Badge><Badge>{s.type}</Badge></div><h3 className="scheme-name">{s.name}</h3><p className="scheme-prov">{s.provider}</p></div>
+          <div style={{textAlign:'right',flexShrink:0}}><p className="amt">{s.amountLabel}</p><p className="xs muted">Deadline {fmt(s.deadline)}</p></div>
+        </div>
+        <div className="criteria-list">{r.checks.map((c,i)=><div className="criteria-item" key={i}><div><strong>{c.label}</strong><div className="xs muted">Required: {c.need} · Your profile: {c.have || 'Not provided'}</div></div><Badge tone={c.ok?'ok':'warn'}>{c.ok?'Matched':'Review'}</Badge></div>)}</div>
+        {d.missing.length>0 && <p className="sm muted" style={{marginTop:12}}>Documents to prepare: {d.missing.map(x=>DOC_TYPES[x.type]?.label || x.type).join(', ')}.</p>}
+        <div className="row mt" style={{gap:10,flexWrap:'wrap'}}><LinkBtn href={`#/scheme/${s.id}`} size="sm">View scholarship details</LinkBtn><LinkBtn href={`#/simulator?scheme=${s.id}`} variant="outline" size="sm">Explore what-if changes</LinkBtn></div>
+      </Card>)}
+    </div>
+  </div>;
+}
+
+function WhatIfSimulator() {
+  const { data } = useApp();
+  const p = data.profile;
+  const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const initial = schemeById(params.get('scheme')) || SCHEMES[0];
+  const [schemeId,setSchemeId] = useState(initial.id);
+  const [income,setIncome] = useState(String(p.income || ''));
+  const [cgpa,setCgpa] = useState(String(p.cgpa || ''));
+  const [stream,setStream] = useState(p.stream || 'Engineering');
+  const [level,setLevel] = useState(p.level || 'Undergraduate');
+  const scheme = schemeById(schemeId) || SCHEMES[0];
+  const simulated = {...p,income:income===''?NaN:Number(income),cgpa:cgpa===''?NaN:Number(cgpa),stream,level};
+  const actual = eligibility(scheme,p);
+  const trial = eligibility(scheme,simulated);
+  const complete = income!=='' && cgpa!=='' && !!stream && !!level;
+  const changed = ['income','cgpa','stream','level'].some(k=>String(simulated[k]??'')!==String(p[k]??''));
+  return <div>
+    <PageHead eyebrow="Explore possibilities safely" title="What-If Scholarship Simulator" subtitle="Try different study or income scenarios to understand how requirements may change. Your saved student profile will not be edited." actions={<Btn variant="ghost" onClick={()=>{setIncome(String(p.income||''));setCgpa(String(p.cgpa||''));setStream(p.stream||'Engineering');setLevel(p.level||'Undergraduate');}}>Reset to my profile</Btn>} />
+    <div className="insight-grid mt-lg">
+      <Card>
+        <p className="serif" style={{fontSize:18,fontWeight:600}}>Explore a scenario</p>
+        <p className="xs muted" style={{margin:'6px 0 18px'}}>Change the values below to see how this sample scheme's screening criteria respond.</p>
+        <div className="stack" style={{'--gap':'14px'}}>
+          <Field label="Scholarship"><select className="input" value={schemeId} onChange={e=>setSchemeId(e.target.value)}>{SCHEMES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
+          <div className="sim-controls">
+            <Field label="Annual family income (₹)"><input className="input" type="number" min="0" value={income} onChange={e=>setIncome(e.target.value)} placeholder="e.g. 250000" /></Field>
+            <Field label="Current CGPA"><input className="input" type="number" min="0" max="10" step="0.1" value={cgpa} onChange={e=>setCgpa(e.target.value)} placeholder="e.g. 8.0" /></Field>
+            <Field label="Education level"><select className="input" value={level} onChange={e=>setLevel(e.target.value)}><option>Undergraduate</option><option>Postgraduate</option><option>Higher Secondary</option></select></Field>
+            <Field label="Study stream"><select className="input" value={stream} onChange={e=>setStream(e.target.value)}>{STREAM_OPTIONS.map(x=><option key={x}>{x}</option>)}</select></Field>
+          </div>
+        </div>
+        <p className="xs muted" style={{marginTop:16}}>This is a hypothetical comparison only. Never change or misrepresent official application information.</p>
+      </Card>
+      <Card>
+        <p className="serif" style={{fontSize:18,fontWeight:600}}>Scenario result</p>
+        <p className="sm muted" style={{marginTop:6}}>{scheme.name}</p>
+        {!complete ? <div className="empty mt"><h3>Add your scenario details</h3><p>Enter income and CGPA to calculate the comparison.</p></div> : <>
+          <div className="sim-result"><p className="xs muted">HYPOTHETICAL SCREENING</p><h2 style={{fontFamily:'Domine,Georgia,serif',fontSize:26,margin:'4px 0'}}>{trial.metCount} of {trial.checks.length} checks matched</h2><Badge tone={trial.ok?'ok':'warn'}>{trial.ok?'All listed checks met':'Some requirements need review'}</Badge></div>
+          <div className="criteria-list">{trial.checks.map((c,i)=><div className="criteria-item" key={i}><span>{c.label}</span><Badge tone={c.ok?'ok':'warn'}>{c.ok?'Matched':'Not matched'}</Badge></div>)}</div>
+          <p className="sm" style={{marginTop:14}}><strong>Compared with your saved profile:</strong> {changed?'You are viewing a changed hypothetical scenario.':'These values currently match your saved profile.'}</p>
+          <p className="xs muted" style={{marginTop:8}}>The result only checks the limited criteria represented in this demo dataset. It is not an approval prediction or an official eligibility decision.</p>
+        </>}
+      </Card>
+    </div>
+    <Card className="mt-lg"><p className="serif" style={{fontSize:17,fontWeight:600}}>If this opportunity isn't a match</p><p className="sm muted" style={{marginTop:6}}>Explore other listed scholarships rather than changing your real details to fit a scheme.</p><LinkBtn href="#/matches" className="mt" size="sm">Compare other scholarships</LinkBtn></Card>
+  </div>;
+}
+
+/* =========================================================
    14. ROOT: ROUTER, STATE, TOAST
    ========================================================= */
 function useRoute() {
@@ -2258,6 +2347,8 @@ function Root() {
     let view;
     if (path === '/dashboard') view = <Dashboard key={raw} />;
     else if (path === '/discover') view = <Discover key={raw} params={params} />;
+    else if (path === '/matches') view = <SmartMatchCenter key={raw} />;
+    else if (path === '/simulator') view = <WhatIfSimulator key={raw} />;
     else if (path.startsWith('/scheme/')) view = <SchemeDetail key={raw} id={path.split('/')[2]} />;
     else if (path === '/documents') view = <Documents key={raw} />;
     else if (path === '/applications') view = <Applications key={raw} />;
