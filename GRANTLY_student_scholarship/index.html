@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRANTLY — Scholarships Shouldn't Be Difficult to Find</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --canvas: #FFF8F5; --canvas-low: #FAF6F0; --sidebar: #F4EEE8; --white: #FFFFFF;
+      --forest: #1E3A2F; --terra: #B85828; --terra-hover: #9E491E;
+      --espresso: #2B2118; --cocoa: #6E5F53; --line: #EADDD3;
+      --ok: #2E6838; --ok-bg: #EBF5EE;
+      --warn: #B47318; --warn-bg: #FEF7EA;
+      --bad: #BD4832; --bad-bg: #FDF0ED;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--canvas); color: var(--espresso); font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4 { font-family: Domine, Georgia, serif; color: var(--espresso); margin: 0; line-height: 1.2; }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    input:focus, select:focus { outline: 2px solid var(--forest); outline-offset: 0; }
+
+    /* ---------- Utilities ---------- */
+    .muted { color: var(--cocoa); }
+    .xs { font-size: 12px; }
+    .sm { font-size: 13px; }
+    .accent { color: var(--terra); }
+    .ok-text { color: var(--ok); }
+    .warn-text { color: var(--warn); }
+    .bad-text { color: var(--bad); }
+    .serif { font-family: Domine, Georgia, serif; }
+    .eyebrow { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--cocoa); margin-bottom: 6px; }
+    .stack > * + * { margin-top: 16px; }
+    .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .between { justify-content: space-between; }
+    .end { justify-content: flex-end; }
+    .mt { margin-top: 16px; }
+    .mt-lg { margin-top: 24px; }
+    .divider { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 20px; }
+    .grid { display: grid; gap: 20px; }
+    .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+    .split-wide { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
+    .split-equal { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    @media (max-width: 1100px) {
+      .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split, .split-wide, .split-equal { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 900px) { .g3 { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 640px) { .g2, .g4 { grid-template-columns: minmax(0, 1fr); } }
+
+    /* ---------- Buttons ---------- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 8px; border: 1px solid transparent; font-size: 14px; font-weight: 500; transition: background .15s, border-color .15s; white-space: nowrap; background: none; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--terra); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--terra-hover); }
+    .btn-dark { background: var(--forest); color: #fff; }
+    .btn-dark:hover:not(:disabled) { background: #2a4d3f; }
+    .btn-ghost { background: var(--white); border-color: var(--line); color: var(--espresso); }
+    .btn-ghost:hover:not(:disabled) { background: var(--canvas-low); }
+    .btn-danger { background: var(--white); border-color: var(--line); color: var(--bad); }
+    .btn-danger:hover:not(:disabled) { background: var(--bad-bg); }
+    .btn-sm { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+    .btn-block { width: 100%; }
+    .btn-lg { min-height: 48px; padding: 12px 22px; font-size: 15px; }
+
+    /* ---------- Forms ---------- */
+    .input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--canvas-low); font-size: 14px; }
+    .input::placeholder { color: rgba(110, 95, 83, .6); }
+    .select { appearance: auto; }
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .field-label { font-size: 14px; font-weight: 500; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .field-req { font-size: 12px; font-weight: 400; color: var(--cocoa); }
+    .field-hint { font-size: 12px; color: var(--cocoa); }
+    .check { display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 44px; }
+    .check input { width: 18px; height: 18px; accent-color: var(--forest); }
+
+    /* ---------- Cards, badges, progress ---------- */
+    .card { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(43, 33, 24, .04); min-width: 0; }
+    .card.flush { padding: 0; overflow: hidden; }
+    .card.hover:hover { box-shadow: 0 6px 18px rgba(43, 33, 24, .08); }
+    .card.alert { border-color: rgba(189, 72, 50, .4); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; border: 1px solid; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 500; }
+    .badge-ok { background: var(--ok-bg); color: var(--ok); border-color: rgba(46, 104, 56, .25); }
+    .badge-warn { background: var(--warn-bg); color: var(--warn); border-color: rgba(180, 115, 24, .3); }
+    .badge-bad { background: var(--bad-bg); color: var(--bad); border-color: rgba(189, 72, 50, .3); }
+    .badge-neutral { background: var(--canvas-low); color: var(--cocoa); border-color: var(--line); }
+    .progress { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
+    .progress > span { display: block; height: 100%; border-radius: 999px; background: var(--forest); transition: width .3s ease; }
+    .progress.terra > span { background: var(--terra); }
+    .progress.warn > span { background: var(--warn); }
+    .progress.bad > span { background: var(--bad); }
+    .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); }
+    .stat-value { font-family: Domine, Georgia, serif; font-size: 30px; font-weight: 700; margin-top: 8px; line-height: 1.1; }
+    .stat-note { font-size: 13px; color: var(--cocoa); margin-top: 6px; }
+    .link { color: var(--terra); font-size: 14px; font-weight: 500; }
+    .link:hover { text-decoration: underline; }
+
+    /* ---------- Page head, empty, notes ---------- */
+    .pagehead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .pagehead h1 { font-size: 30px; }
+    .pagehead p { margin-top: 6px; color: var(--cocoa); }
+    .pagehead .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .empty { border: 1px dashed var(--line); border-radius: 12px; background: var(--white); padding: 32px 20px; text-align: center; }
+    .empty h3 { font-size: 18px; }
+    .empty p { margin: 6px auto 0; max-width: 480px; color: var(--cocoa); font-size: 14px; }
+    .empty .btn { margin-top: 16px; }
+    .note { background: var(--canvas-low); border-radius: 8px; padding: 12px 14px; font-size: 14px; }
+    .alert-row { border: 1px solid; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+    .alert-bad { background: var(--bad-bg); border-color: rgba(189, 72, 50, .3); color: var(--bad); }
+    .alert-warn { background: var(--warn-bg); border-color: rgba(180, 115, 24, .3); color: var(--warn); }
+    .alert-box { background: var(--canvas-low); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-size: 14px; }
+
+    /* ---------- Tables ---------- */
+    .table-wrap { overflow-x: auto; }
+    table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.t.wide { min-width: 720px; }
+    table.t th { background: var(--canvas-low); text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--cocoa); font-weight: 500; padding: 12px 16px; }
+    table.t td { padding: 14px 16px; border-top: 1px solid var(--line); vertical-align: top; }
+    table.t td.num { white-space: nowrap; }
+
+    /* ---------- Steppers ---------- */
+    .steps { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
+    .steps.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .steps.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    @media (max-width: 900px) { .steps.five, .steps.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 520px) { .steps.five, .steps.four { grid-template-columns: minmax(0, 1fr); } }
+    .step { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--white); min-width: 0; }
+    .step.active { border-color: var(--terra); background: #FFF1E8; }
+    .step-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .dot { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 12px; font-weight: 600; background: var(--line); color: var(--cocoa); flex-shrink: 0; }
+    .step.done .dot { background: var(--forest); color: #fff; }
+    .step.active .dot { background: var(--terra); color: #fff; }
+    .step-state { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); }
+    .step.done .step-state { color: var(--forest); }
+    .step.active .step-state { color: var(--terra); }
+    .step-title { margin-top: 10px; font-size: 14px; font-weight: 500; }
+    .onb-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 760px) { .onb-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .onb-tab { text-align: left; background: none; border: none; padding: 0; }
+    .onb-tab .bar { height: 4px; border-radius: 999px; background: var(--line); margin-top: 12px; }
+    .onb-tab.on .bar, .onb-tab.done .bar { background: var(--forest); }
+    .onb-tab .circle { width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 12px; font-weight: 600; background: var(--line); color: var(--cocoa); margin-right: 8px; vertical-align: middle; }
+    .onb-tab.on .circle, .onb-tab.done .circle { background: var(--forest); color: #fff; }
+    .onb-tab .label { font-size: 14px; vertical-align: middle; color: var(--cocoa); }
+    .onb-tab.on .label { color: var(--espresso); font-weight: 600; }
+
+    /* ---------- Choice buttons ---------- */
+    .choices { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .choices.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 640px) { .choices, .choices.two { grid-template-columns: minmax(0, 1fr); } }
+    .choice { min-height: 48px; border: 1px solid var(--line); background: var(--canvas-low); border-radius: 8px; padding: 12px 16px; text-align: left; font-weight: 500; font-size: 14px; }
+    .choice:hover { border-color: var(--terra); }
+    .choice.on { background: var(--forest); border-color: var(--forest); color: #fff; }
+    .seg { display: flex; flex-wrap: wrap; gap: 8px; }
+    .seg button { min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--white); font-size: 14px; }
+    .seg button.on { background: var(--forest); border-color: var(--forest); color: #fff; }
+
+    /* ---------- Layout shell ---------- */
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; flex-shrink: 0; background: var(--sidebar); border-right: 1px solid var(--line); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; z-index: 40; }
+    .sb-brand { padding: 24px 20px 16px; }
+    .sb-tag { margin-top: 6px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--cocoa); }
+    .sb-nav { flex: 1; overflow-y: auto; padding: 0 12px 16px; }
+    .sb-group { padding: 0 12px 6px; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--cocoa); margin-top: 18px; }
+    .sb-link { display: block; padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 2px; }
+    .sb-link:hover { background: rgba(255, 255, 255, .7); }
+    .sb-link.active { background: var(--forest); color: #fff; font-weight: 500; }
+    .sb-dossier { margin: 12px; padding: 12px; background: var(--white); border: 1px solid var(--line); border-radius: 8px; }
+    .sb-dossier .k { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--terra); }
+    .content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: rgba(255, 248, 245, .96); border-bottom: 1px solid var(--line); }
+    .menu-btn { display: none; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
+    .menu-btn span { display: block; width: 18px; height: 2px; background: var(--espresso); }
+    .crumb { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .crumb b { color: var(--terra); font-weight: 600; }
+    .topbar .search { margin-left: auto; width: 240px; max-width: 100%; }
+    .profile-chip { display: flex; gap: 6px; align-items: center; padding: 8px 12px; border: 1px solid var(--line); background: var(--white); border-radius: 8px; font-size: 13px; white-space: nowrap; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--forest); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 14px; flex-shrink: 0; }
+    .main { padding: 28px 28px 48px; flex: 1; min-width: 0; }
+    .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .3); z-index: 35; }
+    @media (max-width: 1023px) {
+      .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform .25s ease; box-shadow: 0 0 30px rgba(0, 0, 0, .15); }
+      .sidebar.open { transform: translateX(0); }
+      .menu-btn { display: flex; }
+    }
+    @media (max-width: 900px) {
+      .crumb, .profile-chip { display: none; }
+      .topbar { padding: 10px 16px; }
+    }
+    @media (max-width: 640px) {
+      .main { padding: 18px 16px 40px; }
+      .topbar .search { width: auto; flex: 1; }
+      .avatar { display: none; }
+    }
+
+    /* ---------- Landing ---------- */
+    .wrap { max-width: 1152px; margin: 0 auto; padding: 0 24px; }
+    .lp-header { position: sticky; top: 0; z-index: 30; background: rgba(255, 248, 245, .96); border-bottom: 1px solid var(--line); }
+    .lp-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 14px; padding-bottom: 14px; }
+    .lp-nav { display: flex; gap: 28px; font-size: 14px; color: var(--cocoa); }
+    .lp-nav button { background: none; border: none; padding: 0; color: var(--cocoa); font-size: 14px; }
+    .lp-nav button:hover, .lp-nav a:hover { color: var(--espresso); }
+    .lp-actions { display: flex; align-items: center; gap: 16px; }
+    .lp-signin { font-size: 14px; color: var(--cocoa); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 72px 0; }
+    .hero h1 { font-size: 52px; line-height: 1.1; margin-top: 20px; }
+    .hero .lead { font-size: 17px; color: var(--cocoa); margin-top: 20px; max-width: 520px; }
+    .hero .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+    .hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; }
+    .hero-stats .v { font-family: Domine, Georgia, serif; font-size: 24px; font-weight: 700; }
+    .hero-stats .l { font-size: 12px; color: var(--cocoa); }
+    .pill { display: inline-block; border: 1px solid var(--line); background: var(--white); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 500; color: var(--forest); text-transform: uppercase; letter-spacing: .06em; }
+    .section { padding: 64px 0; }
+    .section.alt { background: var(--canvas-low); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .section h2 { font-size: 30px; }
+    .section .sub { color: var(--cocoa); margin-top: 8px; max-width: 640px; }
+    .section .lead-grid { margin-top: 36px; }
+    .cta-band { background: var(--forest); border-radius: 16px; padding: 40px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .cta-band h2 { color: #fff; font-size: 28px; }
+    .cta-band p { color: rgba(255, 255, 255, .8); margin-top: 8px; font-size: 14px; }
+    .lp-footer { border-top: 1px solid var(--line); background: var(--canvas-low); padding: 32px 0; font-size: 13px; color: var(--cocoa); }
+    .lp-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .logo { display: inline-flex; align-items: center; gap: 8px; }
+    .logo-mark { width: 32px; height: 32px; border-radius: 6px; background: var(--forest); color: #fff; display: grid; place-items: center; font-family: Domine, Georgia, serif; font-weight: 700; }
+    .logo-text { font-family: Domine, Georgia, serif; font-weight: 700; font-size: 18px; letter-spacing: -.01em; }
+    .logo-text i { font-style: normal; color: var(--terra); }
+    .match-list .m { display: flex; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+    .match-list .m:last-child { border-bottom: none; }
+    .match-list .m .name { font-family: Domine, Georgia, serif; font-size: 14px; font-weight: 600; }
+    .match-list .m .amt { font-family: Domine, Georgia, serif; font-size: 14px; font-weight: 600; color: var(--terra); text-align: right; white-space: nowrap; }
+    .hint-foot { font-size: 12px; font-style: italic; color: var(--cocoa); background: var(--canvas-low); padding: 10px 20px; text-align: center; }
+    .trust-card h3 { font-size: 16px; }
+    .trust-card p { margin-top: 8px; font-size: 14px; color: var(--cocoa); }
+    .problem-card h3 { font-size: 16px; }
+    .problem-card p { margin-top: 8px; font-size: 14px; color: var(--cocoa); }
+    .step-card .n { font-family: Domine, Georgia, serif; font-size: 26px; font-weight: 700; color: var(--terra); }
+    .step-card h3 { margin-top: 14px; font-size: 18px; }
+    .step-card p { margin-top: 8px; font-size: 14px; color: var(--cocoa); }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: minmax(0, 1fr); padding: 48px 0; }
+      .hero h1 { font-size: 40px; }
+      .lp-nav { display: none; }
+    }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 34px; }
+      .hero-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .lp-signin { display: none; }
+      .cta-band { padding: 28px; }
+      .section h2 { font-size: 24px; }
+      .table-wrap table.t.landing { min-width: 620px; }
+    }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 900px) { .grid-cols-3 { grid-template-columns: minmax(0, 1fr); } }
+
+    /* ---------- Onboarding ---------- */
+    .ob-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--canvas); gap: 12px; }
+    .ob-header .tag { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); }
+    .ob-wrap { max-width: 1152px; margin: 0 auto; padding: 28px 24px 48px; }
+    .ob-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; margin-top: 24px; }
+    @media (max-width: 1000px) { .ob-grid { grid-template-columns: minmax(0, 1fr); } }
+    .ob-body { display: flex; flex-direction: column; gap: 22px; margin-top: 12px; }
+    .ob-body h1 { font-size: 30px; }
+    .ob-body .lead { color: var(--cocoa); }
+    .ob-actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 24px; margin-top: 32px; }
+    .dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; background: var(--canvas-low); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 0; }
+    .dl dt { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); }
+    .dl dd { margin: 2px 0 0; font-weight: 500; }
+    @media (max-width: 640px) { .dl { grid-template-columns: minmax(0, 1fr); } }
+    .big-num { font-family: Domine, Georgia, serif; font-size: 44px; font-weight: 700; line-height: 1; }
+    .big-num small { font-family: Inter, sans-serif; font-size: 15px; font-weight: 400; color: var(--cocoa); margin-left: 6px; }
+    .mini-match { display: flex; justify-content: space-between; gap: 8px; padding: 10px 12px; background: var(--canvas-low); border-radius: 8px; font-size: 14px; }
+    .mini-match .amt { color: var(--terra); white-space: nowrap; }
+    .ul-plain { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: var(--cocoa); }
+    .ul-plain strong { color: var(--espresso); }
+
+    /* ---------- Dashboard ---------- */
+    .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 1100px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .stat-grid { grid-template-columns: minmax(0, 1fr); } }
+    .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+    .feature-left { background: var(--forest); color: #fff; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
+    .feature-left .sub { color: rgba(255, 255, 255, .75); font-size: 14px; margin-top: 6px; }
+    .feature-left .pill-light { display: inline-block; background: rgba(255, 255, 255, .15); border-radius: 999px; padding: 4px 12px; font-size: 12px; align-self: flex-start; }
+    .feature-right { padding: 24px; min-width: 0; }
+    .feature-right .k { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); }
+    .feature-right .v { font-family: Domine, Georgia, serif; font-size: 24px; font-weight: 700; margin-top: 4px; }
+    .feature-note { margin-top: 16px; border: 1px solid var(--line); background: var(--canvas-low); border-radius: 10px; padding: 14px; font-size: 14px; }
+    @media (max-width: 900px) { .feature { grid-template-columns: minmax(0, 1fr); } }
+    .list-rows > * { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .list-rows > *:first-child { padding-top: 0; }
+    .list-rows > *:last-child { border-bottom: none; padding-bottom: 0; }
+    .app-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+    .app-card + .app-card { margin-top: 14px; }
+    .alert-card { border-radius: 10px; border: 1px solid; padding: 12px; font-size: 14px; }
+    .alert-card.bad { background: var(--bad-bg); border-color: rgba(189, 72, 50, .3); }
+    .alert-card.warn { background: var(--warn-bg); border-color: rgba(180, 115, 24, .3); }
+
+    /* ---------- Discover ---------- */
+    .banner { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--cocoa); }
+    .banner strong { color: var(--espresso); }
+    .filters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)) auto; gap: 14px; align-items: end; }
+    @media (max-width: 1100px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .filters { grid-template-columns: minmax(0, 1fr); } }
+    .scheme-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+    .scheme-top .amt { font-family: Domine, Georgia, serif; font-size: 20px; font-weight: 700; color: var(--terra); }
+    .scheme-top .dl2 { font-size: 12px; color: var(--cocoa); margin-top: 4px; text-align: right; }
+    .scheme-name { font-size: 18px; margin-top: 12px; }
+    .scheme-prov { font-size: 14px; color: var(--cocoa); margin-top: 4px; }
+    .scheme-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ---------- Missing Piece Engine & details ---------- */
+    .engine { border: 2px solid rgba(184, 88, 40, .55); background: var(--canvas); border-radius: 12px; padding: 20px; }
+    .engine-title { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(184, 88, 40, .45); background: var(--white); color: var(--terra); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+    .engine-cells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+    @media (max-width: 900px) { .engine-cells { grid-template-columns: minmax(0, 1fr); } }
+    .engine-cell { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+    .engine-cell .h { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .engine-cell .b { font-size: 14px; margin-top: 10px; }
+    .engine-cell .f { font-size: 12px; color: var(--cocoa); margin-top: 12px; }
+    .engine-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .detail-title { font-size: 34px; line-height: 1.15; }
+    .detail-meta { font-size: 14px; color: var(--cocoa); margin-top: 12px; }
+    .detail-meta strong { color: var(--espresso); font-weight: 600; }
+    .detail-meta .amt { color: var(--terra); font-weight: 600; }
+    .detail-actions { display: flex; flex-direction: column; gap: 10px; min-width: 200px; }
+    .detail-head { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .crumbs { font-size: 14px; color: var(--cocoa); margin-bottom: 14px; }
+    .crumbs a { color: var(--terra); }
+    .crumbs a:hover { text-decoration: underline; }
+    .ring-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+    .ring-row + .ring-row { margin-top: 8px; }
+    .ring-row span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ---------- Documents ---------- */
+    .doc-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 1100px) { .doc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .doc-stats { grid-template-columns: minmax(0, 1fr); } }
+    .dropzone { border: 2px dashed var(--line); background: var(--canvas-low); border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all .15s; }
+    .dropzone:hover, .dropzone.active { border-color: var(--terra); background: #FFF1E8; }
+    .dropzone .t { font-weight: 500; overflow-wrap: anywhere; }
+    .dropzone .s { font-size: 12px; color: var(--cocoa); margin-top: 4px; }
+    .upload-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+    @media (max-width: 760px) { .upload-grid { grid-template-columns: minmax(0, 1fr); } }
+    .side-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--cocoa); }
+    .side-list strong { color: var(--espresso); }
+    .mini-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    @media (max-width: 1100px) { .mini-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .mini-cards { grid-template-columns: minmax(0, 1fr); } }
+    .mini-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+    .mini-card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .mini-card .n { font-size: 14px; font-weight: 500; }
+    .mini-card .d { font-size: 12px; color: var(--cocoa); margin-top: 8px; }
+    .vault-item { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--white); }
+    .vault-item + .vault-item { margin-top: 14px; }
+    .vault-body { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .vault-main { flex: 1 1 360px; min-width: 0; }
+    .vault-side { flex: 0 0 220px; display: flex; flex-direction: column; gap: 10px; }
+    @media (max-width: 760px) { .vault-side { flex: 1 1 100%; } }
+    .vault-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .vault-title .n { font-weight: 600; }
+    .vault-file { font-size: 12px; color: var(--cocoa); margin-top: 4px; overflow-wrap: anywhere; }
+    .vault-dates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    @media (max-width: 560px) { .vault-dates { grid-template-columns: minmax(0, 1fr); } }
+    .vault-dates .k { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--cocoa); }
+    .vault-dates .v { font-weight: 500; margin-top: 2px; }
+    .vault-dates .v.ok { color: var(--ok); }
+    .vault-dates .v.warn { color: var(--warn); }
+    .vault-dates .v.bad { color: var(--bad); }
+    .vault-bar { margin-top: 14px; }
+    .vault-bar .p { font-size: 12px; color: var(--cocoa); margin-top: 6px; }
+    .vault-side .field-label { font-size: 12px; color: var(--cocoa); font-weight: 500; }
+    .vault-side .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* ---------- Applications ---------- */
+    .stat-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 760px) { .stat-trio { grid-template-columns: minmax(0, 1fr); } }
+    .app-block + .app-block { margin-top: 18px; }
+    .app-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .app-head h3 { font-size: 18px; margin-top: 6px; }
+    .app-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 18px; }
+    .eyebrow-sm { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--cocoa); }
+
+    /* ---------- Radar ---------- */
+    .urgent-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+    @media (max-width: 900px) { .urgent-grid { grid-template-columns: minmax(0, 1fr); } }
+    .urgent-card h3 { font-size: 16px; margin-top: 14px; }
+    .urgent-card .prov { font-size: 12px; color: var(--cocoa); margin-top: 4px; }
+    .urgent-card .amt { font-size: 14px; color: var(--terra); margin-top: 12px; font-weight: 500; }
+    .urgent-card .btn { width: 100%; margin-top: 16px; }
+    .table-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    .table-head h3 { font-size: 18px; }
+    .table-head p { font-size: 14px; color: var(--cocoa); margin-top: 4px; }
+    .table-head select { min-height: 40px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--canvas-low); font-size: 14px; }
+    .table-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .table-actions .btn { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+    .cal-list { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+    .cal-list li { display: flex; align-items: center; gap: 12px; }
+    .cal-list .d { width: 100px; flex-shrink: 0; font-weight: 500; }
+    .cal-list .dot2 { width: 8px; height: 8px; border-radius: 50%; background: var(--terra); flex-shrink: 0; }
+    .cal-list .n { color: var(--cocoa); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pipe-list { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .pipe-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+    .pipe-list .n { font-size: 14px; font-weight: 500; min-width: 0; }
+    .pipe-list .d { font-size: 12px; color: var(--cocoa); }
+
+    /* ---------- Ask GRANTLY ---------- */
+    .ask-side .suggest { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .ask-side .suggest button { text-align: left; padding: 10px 12px; border: 1px solid var(--line); background: var(--canvas-low); border-radius: 8px; font-size: 14px; line-height: 1.4; }
+    .ask-side .suggest button:hover { border-color: var(--terra); }
+    .chat-card { display: flex; flex-direction: column; min-height: 560px; padding: 0; overflow: hidden; }
+    .chat-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+    .chat-head .n { font-family: Domine, Georgia, serif; font-weight: 600; }
+    .chat-head .s { font-size: 12px; color: var(--cocoa); }
+    .chat-log { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; max-height: 480px; }
+    .bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .bubble.user { align-self: flex-end; background: var(--forest); color: #fff; border-bottom-right-radius: 4px; }
+    .bubble.bot { align-self: flex-start; background: var(--canvas-low); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+    .chat-welcome { background: var(--canvas-low); border-radius: 12px; padding: 18px; font-size: 14px; color: var(--cocoa); }
+    .chat-welcome strong { color: var(--espresso); }
+    .chat-form { display: flex; gap: 8px; padding: 14px; border-top: 1px solid var(--line); }
+    .chat-form .input { flex: 1; }
+    .chat-foot { padding: 10px 20px; font-size: 12px; color: var(--cocoa); background: var(--canvas-low); border-top: 1px solid var(--line); }
+    .dossier-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; font-family: Domine, Georgia, serif; }
+
+    /* ---------- Toast ---------- */
+    .toast { position: fixed; right: 16px; bottom: 16px; z-index: 60; max-width: 360px; background: var(--white); border: 1px solid rgba(30, 58, 47, .2); border-radius: 10px; padding: 12px 16px; box-shadow: 0 8px 24px rgba(43, 33, 24, .15); font-size: 14px; }
+    .toast.warn { background: var(--warn-bg); border-color: rgba(180, 115, 24, .4); color: #7A4D0F; }
+    @media (max-width: 640px) { .toast { left: 16px; right: 16px; max-width: none; } }
+
+    /* ---------- GRANTLY intelligence tools ---------- */
+    .insight-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .match-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid var(--line); }
+    .match-row:last-child { border-bottom:0; }
+    .criteria-list { display:grid; gap:0; margin-top:10px; }
+    .criteria-item { display:flex; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); font-size:13px; }
+    .criteria-item:last-child { border-bottom:0; }
+    .sim-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .sim-result { border-left:3px solid var(--forest); padding:12px 16px; background:var(--canvas-low); margin-top:12px; }
+    .doc-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+    .doc-summary > div { padding:15px; border:1px solid var(--line); background:var(--white); }
+    .tool-intro { max-width:760px; color:var(--cocoa); margin-top:8px; }
+    @media(max-width:760px) { .insight-grid,.sim-controls { grid-template-columns:1fr; } .doc-summary { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useContext, createContext, useRef } = React;
+
+/* =========================================================
+   1. CONSTANTS, DATE HELPERS, STORAGE
+   ========================================================= */
+const KEY = 'grantly.v4'; // v4 starts with a clean, student-owned profile
+const AppCtx = createContext(null);
+const useApp = () => useContext(AppCtx);
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+const startOfToday = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const toISO = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const todayISO = () => toISO(new Date());
+const addDays = (n) => { const d = startOfToday(); d.setDate(d.getDate() + n); return toISO(d); };
+const parseDate = (s) => (s ? new Date(s + 'T00:00:00') : null);
+const daysUntil = (s) => Math.ceil((parseDate(s) - startOfToday()) / 86400000);
+const fmt = (s) => (s ? parseDate(s).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
+const inr = (n) => '₹' + Number(n).toLocaleString('en-IN');
+const acStartYear = () => { const d = new Date(); return d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; };
+const acStart = () => `${acStartYear()}-07-01`;
+const acLabel = () => `${acStartYear()}–${String(acStartYear() + 1).slice(2)}`;
+
+const DOC_TYPES = {
+  aadhaar: {
+    label: 'Aadhaar Card', issuer: 'UIDAI', validityDays: null,
+    why: 'Identity is verified against your Aadhaar for NSP and most government portals.',
+    next: 'Keep a clear, complete scan ready. Link your mobile number to Aadhaar for OTP verification.'
+  },
+  marksheet: {
+    label: 'Class 10 & 12 Marksheets', issuer: 'Board of Education', validityDays: null,
+    why: 'Academic eligibility (board percentile or class-12 score) is checked from these marks.',
+    next: 'Upload a grayscale PDF scan with the original roll numbers visible.'
+  },
+  income: {
+    label: 'Income Certificate', issuer: 'Tahsildar / SDM', validityDays: 365,
+    why: 'Family income must fall under the scheme ceiling. Most states treat this as valid for one year.',
+    next: 'Apply to your Tahsildar office for a fresh certificate if the current one is outdated.'
+  },
+  domicile: {
+    label: 'Domicile Certificate', issuer: 'District Collectorate', validityDays: 1825,
+    why: 'Some state and central schemes need proof of residence in the state.',
+    next: 'Check your state’s validity rule and renew before the expiry date.'
+  },
+  bonafide: {
+    label: 'College Bonafide Certificate', issuer: 'College Registrar / Dean', validityDays: 365, mustBeCurrentAY: true,
+    why: 'Proves current enrollment. Trusts usually want a certificate for the current academic year, with the college seal.',
+    next: 'Download the pre-filled format, get the Registrar’s signature and seal, then upload the scanned PDF.'
+  },
+  bank: {
+    label: 'Bank Passbook / Cancelled Cheque', issuer: 'Bank', validityDays: null,
+    why: 'Scholarship amounts are paid by direct bank transfer to an account in your own name.',
+    next: 'Upload a page showing IFSC, account number and your full name matching Aadhaar.'
+  },
+  photo: {
+    label: 'Passport-size Photograph', issuer: 'Self', validityDays: null,
+    formats: ['jpg', 'png'], maxKB: 50,
+    why: 'Portals require a recent, clear photo for identity matching.',
+    next: 'Use a neutral background, 35×45 mm, JPG or PNG under 50 KB.'
+  }
+};
+
+const RAW_SCHEMES = [
+  {
+    id: 'reliance', name: 'Reliance Foundation Undergraduate Scholarship', provider: 'Reliance Foundation',
+    amount: 200000, amountLabel: '₹2,00,000 total', type: 'Private · Merit-cum-means', level: 'Undergraduate',
+    maxIncome: 250000, minCgpa: 7.5, stream: ['Engineering', 'Science'], deadlineOffset: 18,
+    docs: ['aadhaar', 'marksheet', 'income', 'bonafide', 'photo'],
+    summary: 'Merit-cum-means support for full-time undergraduate students across India, including academic resources and mentorship.',
+    steps: ['Check eligibility', 'Prepare documents', 'Submit on portal', 'College verification', 'Grant disbursed']
+  },
+  {
+    id: 'aicte', name: 'AICTE Pragati Scholarship for Girls', provider: 'AICTE & Ministry of Education',
+    amount: 50000, amountLabel: '₹50,000 / year', type: 'Central · Girls', level: 'Undergraduate',
+    maxIncome: 800000, minCgpa: 0, stream: ['Engineering'], deadlineOffset: 25,
+    docs: ['aadhaar', 'marksheet', 'income', 'bonafide', 'bank'],
+    summary: 'Supports female students pursuing technical degrees in AICTE-approved institutions.',
+    steps: ['Check eligibility', 'Prepare documents', 'Submit on portal', 'Institutional verification', 'Disbursed via DBT']
+  },
+  {
+    id: 'tata', name: 'Tata Trusts Medical & Engineering Grant', provider: 'Sir Ratan Tata Trust',
+    amount: 75000, amountLabel: 'Up to ₹75,000 / year', type: 'Trust · Merit & need', level: 'Undergraduate',
+    maxIncome: 250000, minCgpa: 0, stream: ['Engineering', 'Medical'], deadlineOffset: 31,
+    docs: ['aadhaar', 'marksheet', 'income', 'bonafide', 'bank'],
+    summary: 'Requires verification of first-attempt marksheets and the fee receipt.',
+    steps: ['Check eligibility', 'Prepare documents', 'Submit draft', 'Trust review', 'Disbursed']
+  },
+  {
+    id: 'nsp', name: 'Central Sector Scheme of Scholarship (NSP CSSS)', provider: 'Department of Higher Education',
+    amount: 20000, amountLabel: '₹12,000 – ₹20,000 / year', type: 'Government · NSP', level: 'Undergraduate',
+    maxIncome: 450000, minCgpa: 0, stream: ['Engineering', 'Science', 'Arts'], deadlineOffset: 45,
+    docs: ['aadhaar', 'marksheet', 'income', 'domicile', 'bonafide', 'bank'],
+    summary: 'Central scheme for students who scored well in class 12 board examinations and come from families under the income ceiling.',
+    steps: ['Check eligibility', 'Prepare documents', 'Submit on NSP', 'District Nodal Officer review', 'DBT credit']
+  },
+  {
+    id: 'infosys', name: 'Infosys Foundation STEM Stars Scholarship', provider: 'Infosys Foundation',
+    amount: 100000, amountLabel: 'Up to ₹1,00,000 / year', type: 'CSR · STEM', level: 'Undergraduate',
+    maxIncome: 1000000, minCgpa: 8.5, stream: ['Engineering', 'Science'], deadlineOffset: 25,
+    docs: ['aadhaar', 'marksheet', 'bonafide', 'photo'],
+    summary: 'Supports women in STEM with a class 12 score of at least 85 percent.',
+    steps: ['Check eligibility', 'Prepare documents', 'Submit on portal', 'Aptitude test', 'Award decision']
+  }
+];
+const SCHEMES = RAW_SCHEMES.map(s => ({ ...s, deadline: addDays(s.deadlineOffset) }));
+const schemeById = (id) => SCHEMES.find(s => s.id === id);
+const APP_STAGES = ['Eligibility checked', 'Documents prepared', 'Application submitted', 'Institutional verification', 'Grant disbursed'];
+const STREAM_OPTIONS = ['Engineering', 'Science', 'Medical', 'Arts', 'Commerce'];
+const STATES = ['Maharashtra', 'Karnataka', 'Tamil Nadu', 'Delhi', 'Uttar Pradesh', 'Gujarat', 'West Bengal', 'Telangana', 'Other'];
+
+const seedData = () => ({
+  profile: {
+    name: '', level: '', degree: '', year: '', college: '',
+    cgpa: '', income: '', state: '', category: '', stream: ''
+  },
+  certs: [],
+  apps: [],
+  shortlist: [],
+  chat: []
+});
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* fall back to seed */ }
+  return seedData();
+}
+
+/* =========================================================
+   2. DOMAIN LOGIC
+   ========================================================= */
+function eligibility(s, p) {
+  const checks = [
+    { label: 'Academic level', need: s.level, have: p.level, ok: p.level === s.level },
+    { label: 'Academic standing', need: s.minCgpa ? `CGPA ≥ ${s.minCgpa}` : 'No minimum', have: `CGPA ${p.cgpa}`, ok: p.cgpa >= (s.minCgpa || 0) },
+    { label: 'Family income', need: `≤ ${inr(s.maxIncome)} / yr`, have: inr(p.income), ok: p.income <= s.maxIncome },
+    { label: 'Stream', need: s.stream.join(' / '), have: p.stream, ok: s.stream.includes(p.stream) }
+  ];
+  return { checks, ok: checks.every(c => c.ok), metCount: checks.filter(c => c.ok).length };
+}
+
+function certStatus(c) {
+  if (!c) return 'missing';
+  if (!c.expiryDate) return 'valid';
+  const d = daysUntil(c.expiryDate);
+  if (d < 0) return 'expired';
+  if (d <= 30) return 'expiring';
+  return 'valid';
+}
+
+function latestCert(certs, type) {
+  return certs.filter(c => c.type === type)
+    .sort((a, b) => (b.issueDate || '').localeCompare(a.issueDate || ''))[0];
+}
+
+function diagnose(s, p, certs) {
+  const el = eligibility(s, p);
+  const docs = s.docs.map(type => {
+    const c = latestCert(certs, type);
+    let status = 'missing';
+    let reason = 'Not uploaded yet.';
+    if (c) {
+      const st = certStatus(c);
+      if (st === 'expired') { status = 'expired'; reason = `Expired on ${fmt(c.expiryDate)}.`; }
+      else if (st === 'expiring') { status = 'expiring'; reason = `Expires in ${daysUntil(c.expiryDate)} days.`; }
+      else { status = 'valid'; reason = 'Uploaded and within validity.'; }
+      if (type === 'bonafide' && c.issueDate < acStart()) {
+        status = 'expired';
+        reason = `Issued for an earlier academic year (${fmt(c.issueDate)}).`;
+      }
+    }
+    return { type, status, reason, cert: c };
+  });
+  const missing = docs.filter(d => d.status === 'missing' || d.status === 'expired');
+  const ready = docs.filter(d => d.status === 'valid' || d.status === 'expiring').length;
+  return { el, docs, missing, ready, total: docs.length };
+}
+
+function docReadiness(types, certs) {
+  const ready = types.filter(t => {
+    const c = latestCert(certs, t);
+    if (!c) return false;
+    if (t === 'bonafide' && c.issueDate < acStart()) return false;
+    return certStatus(c) !== 'expired';
+  }).length;
+  return { ready, total: types.length };
+}
+
+function validateUpload(file, type, issueDate, expiryDate) {
+  const errs = [];
+  const warns = [];
+  const cfg = DOC_TYPES[type];
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const normalized = ext === 'jpeg' ? 'jpg' : ext;
+  const allowed = cfg.formats || ['pdf', 'jpg', 'png'];
+  if (!allowed.includes(normalized)) errs.push(`.${ext || 'unknown'} is not accepted. Use ${allowed.join(', ').toUpperCase()}.`);
+  const maxBytes = cfg.maxKB ? cfg.maxKB * 1024 : 2 * 1024 * 1024;
+  if (file.size > maxBytes) errs.push(`File is ${(file.size / 1024).toFixed(0)} KB. The limit for this document is ${cfg.maxKB ? cfg.maxKB + ' KB' : '2 MB'}.`);
+  if (!issueDate) errs.push('Enter the issue date printed on the certificate.');
+  else if (issueDate > todayISO()) errs.push('The issue date cannot be in the future.');
+  if (cfg.validityDays && !expiryDate) errs.push('Enter the valid-till (expiry) date.');
+  if (issueDate && expiryDate && expiryDate <= issueDate) errs.push('The expiry date must be after the issue date.');
+  if (cfg.mustBeCurrentAY && issueDate && issueDate < acStart()) errs.push(`A bonafide must be issued for the current academic year (from ${fmt(acStart())}).`);
+  if (expiryDate && daysUntil(expiryDate) < 0) warns.push('This certificate has already expired. Upload a renewed copy.');
+  else if (expiryDate && daysUntil(expiryDate) <= 30) warns.push(`This certificate expires in ${daysUntil(expiryDate)} days. Plan a renewal.`);
+  return { errs, warns };
+}
+
+const readAsDataURL = (f) => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(r.result);
+  r.onerror = rej;
+  r.readAsDataURL(f);
+});
+
+function downloadBlob(content, filename, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadICS(items) {
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//GRANTLY//EN', 'CALSCALE:GREGORIAN'];
+  items.forEach(s => {
+    const d = s.deadline.replace(/-/g, '');
+    lines.push('BEGIN:VEVENT', `UID:${s.id}-${d}@grantly`, `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${d}`,
+      `SUMMARY:${s.name} — application deadline`, 'END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  downloadBlob(lines.join('\r\n'), 'grantly-deadlines.ics', 'text/calendar');
+}
+
+function counselorReply(text, p) {
+  const t = text.toLowerCase();
+  if (/bonafide|bona fide/.test(t)) return `A bonafide certificate must be issued for the current academic year (${acLabel()}), with the Registrar’s or Dean’s signature and the college seal.\n\n1. Download the pre-filled format from the Document Readiness Centre.\n2. Visit the college academic section and request the signature and seal (usually 15–20 minutes).\n3. Upload the scanned PDF well before the portal closes, so OCR checks have time to pass.`;
+  if (/income|tahsil/.test(t)) return `Most state income certificates are valid for one year from the issue date. Your certificate for ${inr(p.income)} per year is in your vault. If it expires before a scholarship review ends, apply to the Tahsildar office early, because processing can take 2–4 weeks.`;
+  if (/expir|valid/.test(t)) return 'Open the Document Readiness Centre to see every expiry date. Anything expiring within 30 days is flagged “Expiring soon”. Renew before the next portal submission, because portals usually reject expired documents.';
+  if (/deadline|close|last date|when/.test(t)) return 'The Opportunity Radar lists your shortlisted deadlines in order of urgency. You can download them as a calendar file (.ics) and add them to your phone calendar.';
+  if (/aptitude|test|exam/.test(t)) return 'Some schemes, such as the Reliance Foundation UG scholarship, include a 60-minute online aptitude assessment. Book a slot from the scheme’s details page. Questions usually cover quantitative reasoning, logical reasoning and English comprehension.';
+  if (/photo|photograph/.test(t)) return 'Passport photos should be 35×45 mm with a neutral background, in JPG or PNG, and under 50 KB for most portals. Good lighting matters more than the camera.';
+  if (/aadhaar|aadhar/.test(t)) return 'Your Aadhaar must have your mobile number linked for OTP verification. Make sure the name on your bank passbook matches your Aadhaar exactly.';
+  return 'I can help with bonafide and income certificates, expiry dates, deadlines, the aptitude test and photo specifications. Try one of the popular questions on the left. This is general guidance, so confirm final rules on each official portal.';
+}
+
+/* =========================================================
+   3. UI PRIMITIVES
+   ========================================================= */
+const Logo = () => (
+  <a href="#/" className="logo">
+    <span className="logo-mark">G</span>
+    <span className="logo-text">GRANTLY<i>•</i></span>
+  </a>
+);
+
+const Card = ({ className = '', children, ...rest }) => (
+  <div className={`card ${className}`} {...rest}>{children}</div>
+);
+
+const Badge = ({ tone = 'neutral', children }) => (
+  <span className={`badge badge-${tone}`}>{children}</span>
+);
+
+const STATUS_TONE = { valid: 'ok', expiring: 'warn', expired: 'bad', missing: 'bad' };
+const STATUS_LABEL = { valid: 'Ready', expiring: 'Expiring soon', expired: 'Expired', missing: 'Missing' };
+
+const Btn = ({ variant = 'primary', size, className = '', ...props }) => (
+  <button className={`btn btn-${variant} ${size === 'sm' ? 'btn-sm' : ''} ${size === 'lg' ? 'btn-lg' : ''} ${className}`} {...props} />
+);
+
+const LinkBtn = ({ href, variant = 'primary', size, className = '', children }) => (
+  <a href={href} className={`btn btn-${variant} ${size === 'sm' ? 'btn-sm' : ''} ${size === 'lg' ? 'btn-lg' : ''} ${className}`}>{children}</a>
+);
+
+const Field = ({ label, hint, required, children }) => (
+  <label className="field">
+    <span className="field-label">
+      <span>{label}</span>
+      {required && <span className="field-req">Required</span>}
+    </span>
+    {children}
+    {hint && <span className="field-hint">{hint}</span>}
+  </label>
+);
+
+const Progress = ({ value, tone }) => (
+  <div className={`progress ${tone && tone !== 'ok' ? tone : ''}`}>
+    <span style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
+  </div>
+);
+
+const PageHead = ({ eyebrow, title, subtitle, actions }) => (
+  <div className="pagehead">
+    <div style={{ minWidth: 0 }}>
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+      <h1>{title}</h1>
+      {subtitle && <p>{subtitle}</p>}
+    </div>
+    {actions && <div className="actions">{actions}</div>}
+  </div>
+);
+
+const Empty = ({ title, text, action }) => (
+  <div className="empty">
+    <h3>{title}</h3>
+    {text && <p>{text}</p>}
+    {action}
+  </div>
+);
+
+/* =========================================================
+   4. APP SHELL
+   ========================================================= */
+const NAV = [
+  { group: 'Dossier & Exploration', items: [['/dashboard', 'Overview / Dashboard'], ['/discover', 'Discover Scholarships'], ['/matches', 'Smart Scholarship Match'], ['/simulator', 'What-If Simulator'], ['/scheme/reliance', 'Scholarship Details']] },
+  { group: 'Operational Pipeline', items: [['/documents', 'Document Readiness Scanner'], ['/applications', 'My Applications'], ['/radar', 'Opportunity Radar & Shortlist']] },
+  { group: 'Advisory Intelligence', items: [['/ask', 'Ask GRANTLY']] }
+];
+
+function Shell({ path, children }) {
+  const { data } = useApp();
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const p = data.profile;
+  const initials = (p.name || 'Student').trim().split(/\s+/).map(s => s[0]).join('').slice(0, 2).toUpperCase();
+  const isActive = (to) => path === to || (to.startsWith('/scheme') && path.startsWith('/scheme'));
+  const crumb = NAV.flatMap(g => g.items).find(([to]) => isActive(to));
+
+  return (
+    <div className="app">
+      {open && <div className="overlay" onClick={() => setOpen(false)} />}
+
+      <aside className={`sidebar ${open ? 'open' : ''}`}>
+        <div className="sb-brand">
+          <Logo />
+          <p className="sb-tag">Scholarships shouldn’t be difficult to find.</p>
+        </div>
+        <nav className="sb-nav">
+          {NAV.map(g => (
+            <div key={g.group}>
+              <p className="sb-group">{g.group}</p>
+              {g.items.map(([to, label]) => (
+                <a key={to} href={`#${to}`} onClick={() => setOpen(false)}
+                   className={`sb-link ${isActive(to) ? 'active' : ''}`}>{label}</a>
+              ))}
+            </div>
+          ))}
+          <div><p className="sb-group">Your account</p><a href="#/onboarding" className={`sb-link ${path === '/onboarding' ? 'active' : ''}`} onClick={() => setOpen(false)}>Edit student profile</a></div>
+        </nav>
+        <div className="sb-dossier">
+          <p className="k">Active dossier</p>
+          <p style={{ fontWeight: 500, marginTop: 4 }}>{p.name || 'New student'}</p>
+          <p className="xs muted">{p.year || 'Study year not added'} · {p.degree || 'Course not added'}</p>
+          <a href="#/onboarding" className="link xs">Edit student profile →</a>
+        </div>
+      </aside>
+
+      <div className="content">
+        <header className="topbar">
+          <button className="menu-btn" onClick={() => setOpen(true)} aria-label="Open menu">
+            <span /><span /><span />
+          </button>
+          <p className="crumb">GRANTLY Central / <b>{crumb ? crumb[1] : 'Dashboard'}</b></p>
+          <form className="search" onSubmit={(e) => { e.preventDefault(); window.location.hash = `#/discover?q=${encodeURIComponent(q)}`; setQ(''); }}>
+            <input className="input" value={q} onChange={e => setQ(e.target.value)} placeholder="Search scholarships…" />
+          </form>
+          <div className="profile-chip">
+            <span className="muted">Profile:</span>
+            <strong>{p.name ? p.name.split(' ')[0] : 'Complete profile'} — {p.level || 'Student'}</strong>
+          </div>
+          <span className="avatar">{initials}</span>
+        </header>
+        <main className="main">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   5. LANDING
+   ========================================================= */
+function Landing() {
+  const jump = (id) => () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  return (
+    <div>
+      <header className="lp-header">
+        <div className="wrap">
+          <Logo />
+          <nav className="lp-nav">
+            <button onClick={jump('how')}>How it works</button>
+            <a href="#/discover">Explore scholarships</a>
+            <button onClick={jump('trust')}>About</button>
+          </nav>
+          <div className="lp-actions">
+            <a href="#/dashboard" className="lp-signin">Sign in</a>
+            <LinkBtn href="#/onboarding" variant="dark" size="sm">Get started</LinkBtn>
+          </div>
+        </div>
+      </header>
+
+      <section className="wrap hero">
+        <div>
+          <span className="pill">Verified academic directory</span>
+          <h1>Your next opportunity deserves to be found.</h1>
+          <p className="lead">Discover scholarships that match your academic journey, understand what you qualify for, and navigate every application with confidence.</p>
+          <div className="ctas">
+            <LinkBtn href="#/onboarding" size="lg">Find my scholarships</LinkBtn>
+            <LinkBtn href="#/discover" variant="ghost" size="lg">Explore opportunities</LinkBtn>
+          </div>
+          <div className="hero-stats">
+            <div><p className="v">{SCHEMES.length}+</p><p className="l">Sample schemes</p></div>
+            <div><p className="v">₹85+ Cr</p><p className="l">Illustrative pool</p></div>
+            <div><p className="v">100%</p><p className="l">Free for students</p></div>
+          </div>
+        </div>
+        <Card style={{ padding: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
+            <span style={{ fontWeight: 500, fontSize: 14 }}>Matched opportunities</span>
+            <Badge tone="ok">{SCHEMES.length} matched</Badge>
+          </div>
+          <div className="match-list">
+            {SCHEMES.slice(0, 3).map(s => (
+              <div key={s.id} className="m">
+                <div style={{ minWidth: 0 }}>
+                  <p className="name">{s.name}</p>
+                  <p className="xs muted" style={{ marginTop: 4 }}>{s.provider} · Deadline {fmt(s.deadline)}</p>
+                </div>
+                <p className="amt">{s.amountLabel}</p>
+              </div>
+            ))}
+          </div>
+          <p className="hint-foot">Illustrative demo data.</p>
+        </Card>
+      </section>
+
+      <section id="how" className="section alt">
+        <div className="wrap">
+          <h2>How GRANTLY works</h2>
+          <p className="sub">Three simple steps to find and secure financial aid.</p>
+          <div className="grid g3 lead-grid">
+            {[
+              ['01', 'Build your student profile', 'Tell us about your education and background so we can find scholarships relevant to you.'],
+              ['02', 'Discover your opportunities', 'See which scholarships you qualify for, and what you are missing for the rest.'],
+              ['03', 'Apply with confidence', 'Upload documents, track their expiry dates, and follow every application step.']
+            ].map(([n, t, d]) => (
+              <Card key={n} className="step-card"><p className="n">{n}</p><h3>{t}</h3><p>{d}</p></Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <h2>Finding scholarships shouldn’t feel confusing.</h2>
+          <p className="sub">Many students miss out not because they aren’t qualified, but because the process is complicated.</p>
+          <div className="grid g3 lead-grid">
+            {[
+              ['Not knowing which scholarships you qualify for', 'We match your profile against each scheme’s eligibility criteria.'],
+              ['Not understanding why you are missing a requirement', 'The Missing Piece Engine pinpoints the exact document you need and how to resolve it.'],
+              ['Getting confused about documents and deadlines', 'Checklists, expiry tracking and deadline countdowns keep you ready well before closing date.']
+            ].map(([t, d]) => (
+              <Card key={t} className="problem-card"><h3>{t}</h3><p>{d}</p></Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="wrap">
+          <div className="between row" style={{ alignItems: 'flex-end' }}>
+            <div>
+              <h2>Scholarships from verified providers</h2>
+              <p className="sub" style={{ marginTop: 8 }}>A curated sample of government, foundation and corporate schemes.</p>
+            </div>
+            <a href="#/discover" className="link">Explore all scholarships →</a>
+          </div>
+          <div className="card flush" style={{ marginTop: 28 }}>
+            <div className="table-wrap">
+              <table className="t landing" style={{ minWidth: 680 }}>
+                <thead>
+                  <tr><th>Scholarship</th><th>Provider</th><th>Award</th><th>Max income</th><th>Deadline</th></tr>
+                </thead>
+                <tbody>
+                  {SCHEMES.map(s => (
+                    <tr key={s.id}>
+                      <td style={{ fontFamily: 'Domine, serif', fontWeight: 600 }}>{s.name}</td>
+                      <td className="muted">{s.provider}</td>
+                      <td className="accent">{s.amountLabel}</td>
+                      <td className="muted num">{inr(s.maxIncome)}</td>
+                      <td className="muted num">{fmt(s.deadline)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="trust" className="section alt">
+        <div className="wrap">
+          <h2>Built for applicant trust and clarity</h2>
+          <p className="sub">A student-first approach to guidance without paywalls or misleading promotions.</p>
+          <div className="grid g4 lead-grid">
+            {[
+              ['Transparent eligibility', 'See exactly which criteria you meet and which you do not.'],
+              ['Document readiness', 'Check format, size and validity before you submit anywhere.'],
+              ['Application guidance', 'Step-by-step instructions to apply on official portals.'],
+              ['Student privacy', 'Your documents stay in your browser. Nothing is sold or shared.']
+            ].map(([t, d]) => (
+              <Card key={t} className="trust-card"><h3>{t}</h3><p>{d}</p></Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="cta-band">
+            <div>
+              <h2>Your scholarship journey starts here.</h2>
+              <p>Create your student profile and discover opportunities that match your goals.</p>
+            </div>
+            <LinkBtn href="#/onboarding" size="lg" className="shrink">Start my scholarship search</LinkBtn>
+          </div>
+        </div>
+      </section>
+
+      <footer className="lp-footer">
+        <div className="wrap">
+          <Logo />
+          <p>GRANTLY is an independent scholarship guidance tool. Official applications are completed on the respective provider portals.</p>
+          <p>© {new Date().getFullYear()} GRANTLY. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+/* =========================================================
+   6. ONBOARDING
+   ========================================================= */
+function Onboarding() {
+  const { data, set, notify } = useApp();
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({ ...data.profile });
+  const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const steps = ['Academic Profile', 'Financial Background', 'Category & Eligibility', 'Review & Finish'];
+  const live = SCHEMES.filter(s => eligibility(s, form).ok);
+  const yearOptions = form.level === 'Higher Secondary'
+    ? ['Class 11', 'Class 12']
+    : form.level === 'Postgraduate'
+      ? ['1st Year', '2nd Year']
+      : ['1st Year', '2nd Year', '3rd Year', '4th / Final Year'];
+
+  const continueStep = () => {
+    if (step === 1 && (!form.name.trim() || !form.level || !form.degree.trim() || !form.year || !form.college.trim() || !form.stream)) {
+      notify('Please complete the required academic details.', 'warn'); return;
+    }
+    if (step === 2 && !form.income) { notify('Please select your annual household income.', 'warn'); return; }
+    setStep(n => n + 1);
+  };
+
+  const finish = () => {
+    if (!form.category || !form.state) { notify('Please select your category and domicile state.', 'warn'); setStep(3); return; }
+    set(d => ({ ...d, profile: { ...form } }));
+    notify('Profile saved. Your matches are updated.');
+    window.location.hash = '#/dashboard';
+  };
+
+  const incomeBands = [
+    { label: 'Up to ₹1L', value: 100000 },
+    { label: '₹1L – ₹2.5L', value: 240000 },
+    { label: '₹2.5L – ₹8L', value: 700000 },
+    { label: 'Above ₹8L', value: 1000000 }
+  ];
+
+  return (
+    <div>
+      <header className="ob-header">
+        <div className="row" style={{ gap: 14 }}>
+          <Logo />
+          <span className="tag">/ Registration dossier · Candidate profiling</span>
+        </div>
+        <a href="#/" className="muted sm">Save & exit</a>
+      </header>
+
+      <div className="ob-wrap">
+        <Card>
+          <div className="onb-steps">
+            {steps.map((label, i) => {
+              const n = i + 1;
+              const cls = step === n ? 'on' : step > n ? 'done' : '';
+              return (
+                <button key={label} className={`onb-tab ${cls}`} onClick={() => n < step && setStep(n)}>
+                  <span className="circle">{step > n ? '✓' : n}</span>
+                  <span className="label">{label}</span>
+                  <div className="bar" />
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        <div className="ob-grid">
+          <Card style={{ padding: 'clamp(20px, 4vw, 32px)' }}>
+            <p className="eyebrow">Step 0{step} of 4</p>
+
+            {step === 1 && (
+              <div className="ob-body">
+                <h1>Build your academic profile</h1>
+                <p className="lead">Tell us about yourself and your current studies so we can find relevant scholarships.</p>
+                <Field label="Full name" required>
+                  <input className="input" type="text" placeholder="Enter your full name" value={form.name || ''} onChange={e => upd('name', e.target.value)} />
+                </Field>
+                <Field label="Current education level" required>
+                  <div className="choices">
+                    {[['Higher Secondary', 'Class 11 – 12'], ['Undergraduate', 'Graduate degree'], ['Postgraduate', 'Master’s / Ph.D.']].map(([val, sub]) => (
+                      <button type="button" key={val} className={`choice ${form.level === val ? 'on' : ''}`} onClick={() => { upd('level', val); upd('year', ''); }}>
+                        <span className="xs" style={{ display: 'block', opacity: .8 }}>{sub}</span>
+                        <span className="serif" style={{ fontSize: 16 }}>{val}</span>
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+                <Field label={form.level === 'Higher Secondary' ? 'School group / subjects' : 'Degree & specialization'} hint="Enter your course or subjects as they appear in your academic records." required>
+                  <input className="input" placeholder={form.level === 'Higher Secondary' ? 'e.g. Science with Mathematics' : 'e.g. B.Tech Computer Science'} value={form.degree || ''} onChange={e => upd('degree', e.target.value)} />
+                </Field>
+                <div className="grid g2">
+                  <Field label={form.level === 'Higher Secondary' ? 'Current class' : 'Current year of study'} required>
+                    <select className="input" value={form.year || ''} onChange={e => upd('year', e.target.value)}>
+                      <option value="">Select {form.level === 'Higher Secondary' ? 'class' : 'year'}</option>
+                      {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Stream">
+                    <select className="input" value={form.stream || ''} onChange={e => upd('stream', e.target.value)}>
+                      <option value="">Select stream</option>{STREAM_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                    </select>
+                  </Field>
+                </div>
+                <Field label={form.level === 'Higher Secondary' ? 'School name' : 'College / university'} required>
+                  <input className="input" placeholder="Enter your institution name" value={form.college || ''} onChange={e => upd('college', e.target.value)} />
+                </Field>
+                <Field label="Most recent CGPA (out of 10)" hint="Optional for now. Enter your latest cumulative result if available.">
+                  <input type="number" step="0.01" min="0" max="10" className="input" placeholder="e.g. 8.2" value={form.cgpa ?? ''} onChange={e => upd('cgpa', e.target.value === '' ? '' : Number(e.target.value))} />
+                </Field>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="ob-body">
+                <h1>Financial background</h1>
+                <p className="lead">Choose the band that matches your household’s gross annual income. Scholarships use this to decide eligibility.</p>
+                <Field label="Annual household income band" required>
+                  <div className="choices two">
+                    {incomeBands.map(b => (
+                      <button key={b.label} className={`choice ${form.income === b.value ? 'on' : ''}`} onClick={() => upd('income', b.value)}>{b.label}</button>
+                    ))}
+                  </div>
+                </Field>
+                <p className="note">Current selection: <strong>{inr(form.income)}</strong> per year. Your Tahsildar income certificate should match this figure.</p>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="ob-body">
+                <h1>Category & eligibility</h1>
+                <p className="lead">Social and regional criteria are used by several government schemes.</p>
+                <div className="grid g2">
+                  <Field label="Social category">
+                    <select className="input" value={form.category || ''} onChange={e => upd('category', e.target.value)}>
+                      <option value="">Select category</option>{['General', 'OBC', 'SC', 'ST', 'EWS'].map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="State of domicile">
+                    <select className="input" value={form.state || ''} onChange={e => upd('state', e.target.value)}>
+                      <option value="">Select state</option>{STATES.map(s => <option key={s}>{s}</option>)}
+                    </select>
+                  </Field>
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="ob-body">
+                <h1>Review & finish</h1>
+                <dl className="dl">
+                  {[['Name', form.name], ['Level', form.level], ['Year / Class', form.year], ['Degree / Subjects', form.degree], ['Stream', form.stream],
+                    ['College / School', form.college], ['CGPA', form.cgpa || 'Not provided'], ['Income', inr(form.income) + ' / yr'], ['Category', form.category], ['State', form.state]
+                  ].map(([k, v]) => (<div key={k}><dt>{k}</dt><dd>{String(v)}</dd></div>))}
+                </dl>
+                <p className="muted sm">Your information is used only to match scholarships and check eligibility. It is never sold or shared.</p>
+              </div>
+            )}
+
+            <div className="ob-actions">
+              <Btn variant="ghost" disabled={step === 1} onClick={() => setStep(s => s - 1)}>← Back</Btn>
+              {step < 4
+                ? <Btn variant="dark" onClick={continueStep}>Continue →</Btn>
+                : <Btn variant="primary" onClick={finish}>Save profile & see matches</Btn>}
+            </div>
+          </Card>
+
+          <aside className="stack">
+            <Card>
+              <p className="stat-label">Live match preview</p>
+              <p className="big-num" style={{ marginTop: 10 }}>{live.length}<small>matching scholarships</small></p>
+              <p className="sm muted" style={{ marginTop: 8 }}>Based on your {form.year} {form.stream} profile and a CGPA of {form.cgpa}.</p>
+              <div className="stack" style={{ marginTop: 16, '--gap': '8px' }}>
+                {live.slice(0, 3).map(s => (
+                  <div key={s.id} className="mini-match"><span style={{ minWidth: 0 }}>{s.name}</span><span className="amt">{s.amountLabel}</span></div>
+                ))}
+                {live.length === 0 && <p className="sm muted">No matches yet. Adjust your income or CGPA to see more.</p>}
+              </div>
+            </Card>
+            <Card>
+              <p className="serif" style={{ fontSize: 16, fontWeight: 600 }}>Why we ask for this</p>
+              <ul className="ul-plain mt">
+                <li><strong>Course details:</strong> many CSR funds are reserved for specific degree fields.</li>
+                <li><strong>Grades & CGPA:</strong> merit-based awards usually set a minimum threshold.</li>
+                <li><strong>Income:</strong> need-based schemes use a household income ceiling.</li>
+              </ul>
+            </Card>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   7. DASHBOARD
+   ========================================================= */
+function Dashboard() {
+  const { data } = useApp();
+  const p = data.profile;
+  const eligible = SCHEMES.filter(s => eligibility(s, p).ok);
+  const featured = eligible[0] || SCHEMES[0];
+  const fd = diagnose(featured, p, data.certs);
+  const shortlisted = SCHEMES.filter(s => data.shortlist.includes(s.id));
+  const reqTypes = [...new Set(shortlisted.flatMap(s => s.docs))];
+  const readiness = docReadiness(reqTypes, data.certs);
+  const alerts = data.certs.map(c => ({ c, st: certStatus(c) })).filter(x => x.st === 'expired' || x.st === 'expiring');
+  const upcoming = [...SCHEMES].sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 4);
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const firstName = p.name ? p.name.split(' ')[0] : 'there';
+  const readyPct = readiness.total ? (readiness.ready / readiness.total) * 100 : 0;
+
+  return (
+    <div>
+      <PageHead
+        eyebrow={`Autumn term · ${new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`}
+        title={`${greet}, ${firstName}.`}
+        subtitle={`${(p.degree || 'Your course').split(' in ')[0]} · ${p.year} · ${p.stream}. Here is your scholarship activity and new recommendations.`}
+        actions={<LinkBtn href="#/discover" variant="ghost">Explore directory</LinkBtn>}
+      />
+
+      <div className="stat-grid">
+        <Card>
+          <p className="stat-label">Matched scholarships</p>
+          <p className="stat-value">{eligible.length}</p>
+          <a href="#/discover" className="link" style={{ display: 'inline-block', marginTop: 12 }}>Explore directory →</a>
+        </Card>
+        <Card>
+          <p className="stat-label">Applications in progress</p>
+          <p className="stat-value">{data.apps.length}</p>
+          <a href="#/applications" className="link" style={{ display: 'inline-block', marginTop: 12 }}>Track progress →</a>
+        </Card>
+        <Card>
+          <p className="stat-label">Document readiness</p>
+          <p className="stat-value">{readiness.ready} <span style={{ fontSize: 16, fontFamily: 'Inter, sans-serif', color: 'var(--cocoa)', fontWeight: 400 }}>of {readiness.total} ready</span></p>
+          <div style={{ marginTop: 12 }}><Progress value={readyPct} /></div>
+          <a href="#/documents" className="link" style={{ display: 'inline-block', marginTop: 12 }}>Open Document Centre →</a>
+        </Card>
+        <Card>
+          <p className="stat-label">Certificate alerts</p>
+          <p className="stat-value">{alerts.length}</p>
+          <p className="stat-note">{alerts.length ? 'Need renewal soon' : 'All certificates are current'}</p>
+        </Card>
+      </div>
+
+      <div className="split mt-lg">
+        <Card className="flush">
+          <div className="feature">
+            <div className="feature-left">
+              <div>
+                <span className="pill-light">Top match for your profile</span>
+                <p className="serif" style={{ fontSize: 20, fontWeight: 600, marginTop: 22 }}>{featured.provider}</p>
+                <p className="sub">{featured.name}</p>
+              </div>
+              <p className="xs" style={{ color: 'rgba(255,255,255,.65)' }}>{featured.type}</p>
+            </div>
+            <div className="feature-right">
+              <p className="k">Award endowment</p>
+              <p className="v">{featured.amountLabel}</p>
+              <p className="k" style={{ marginTop: 16 }}>Application deadline</p>
+              <p style={{ fontWeight: 500 }}>{fmt(featured.deadline)} <span className="accent">({daysUntil(featured.deadline)} days left)</span></p>
+              <div className="feature-note">
+                <p style={{ fontWeight: 500 }}>Eligibility: {fd.el.ok ? 'You meet all criteria' : `${fd.el.metCount} of ${fd.el.checks.length} criteria met`}</p>
+                <p className="muted" style={{ marginTop: 4 }}>
+                  {fd.missing.length
+                    ? `${fd.missing.length} missing document${fd.missing.length > 1 ? 's' : ''}: ${fd.missing.map(m => DOC_TYPES[m.type].label).join(', ')}`
+                    : 'All required documents are ready.'}
+                </p>
+              </div>
+              <div className="row" style={{ marginTop: 18 }}>
+                <LinkBtn href={`#/scheme/${featured.id}`}>View details & missing piece</LinkBtn>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Upcoming deadlines</p>
+          <p className="xs muted" style={{ marginTop: 4 }}>Sorted by closing date</p>
+          <ul className="list-rows" style={{ listStyle: 'none', margin: '16px 0 0', padding: 0 }}>
+            {upcoming.map(s => {
+              const d = daysUntil(s.deadline);
+              return (
+                <li key={s.id} className="between row" style={{ alignItems: 'flex-start' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 500 }}>{s.name}</p>
+                    <p className="xs muted">{fmt(s.deadline)}</p>
+                  </div>
+                  <Badge tone={d <= 7 ? 'bad' : d <= 20 ? 'warn' : 'neutral'}>{d} days</Badge>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      </div>
+
+      <div className="split mt">
+        <Card>
+          <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Your active applications</p>
+          <div className="mt">
+            {data.apps.length === 0 && <Empty title="No applications yet" text="Open a scholarship and start tracking it." />}
+            {data.apps.map(a => {
+              const s = schemeById(a.schemeId);
+              if (!s) return null;
+              return (
+                <div key={a.id} className="app-card">
+                  <div className="between row">
+                    <p style={{ fontWeight: 500 }}>{s.name}</p>
+                    <Badge tone="neutral">Stage {Math.min(a.stage + 1, APP_STAGES.length)} of {APP_STAGES.length}</Badge>
+                  </div>
+                  <div style={{ marginTop: 12 }}><Progress value={(a.stage / APP_STAGES.length) * 100} tone="terra" /></div>
+                  <p className="xs muted" style={{ marginTop: 8 }}>{a.stage >= APP_STAGES.length ? 'Completed' : `Next: ${APP_STAGES[a.stage]}`}</p>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card>
+          <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Certificate alerts</p>
+          <div className="stack mt" style={{ '--gap': '10px' }}>
+            {alerts.length === 0 && <p className="sm muted">No certificates are expired or expiring within 30 days.</p>}
+            {alerts.map(({ c, st }) => (
+              <div key={c.id} className={`alert-card ${st === 'expired' ? 'bad' : 'warn'}`}>
+                <p style={{ fontWeight: 500 }}>{DOC_TYPES[c.type].label}</p>
+                <p className="xs muted" style={{ marginTop: 2 }}>{st === 'expired' ? `Expired ${fmt(c.expiryDate)}` : `Expires ${fmt(c.expiryDate)} (${daysUntil(c.expiryDate)} days)`}</p>
+              </div>
+            ))}
+            <LinkBtn href="#/documents" variant="ghost" className="btn-block">Manage documents</LinkBtn>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* Progress sub-component used above */
+const Progress2 = Progress;
+
+/* =========================================================
+   8. DISCOVER
+   ========================================================= */
+function Discover({ params }) {
+  const { data, set, notify } = useApp();
+  const p = data.profile;
+  const [query, setQuery] = useState(params.get('q') || '');
+  const [level, setLevel] = useState('All');
+  const [type, setType] = useState('All');
+  const [onlyEligible, setOnlyEligible] = useState(false);
+  const [sort, setSort] = useState('match');
+  const types = ['All', ...new Set(SCHEMES.map(s => s.type.split(' · ')[0]))];
+
+  const rows = useMemo(() => {
+    let list = SCHEMES.map(s => ({ ...s, el: eligibility(s, p) }));
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter(s => (s.name + ' ' + s.provider + ' ' + s.stream.join(' ')).toLowerCase().includes(q));
+    }
+    if (level !== 'All') list = list.filter(s => s.level === level);
+    if (type !== 'All') list = list.filter(s => s.type.startsWith(type));
+    if (onlyEligible) list = list.filter(s => s.el.ok);
+    if (sort === 'deadline') list.sort((a, b) => a.deadline.localeCompare(b.deadline));
+    if (sort === 'amount') list.sort((a, b) => b.amount - a.amount);
+    if (sort === 'match') list.sort((a, b) => b.el.metCount - a.el.metCount);
+    return list;
+  }, [query, level, type, onlyEligible, sort, p]);
+
+  const toggleShortlist = (id) => {
+    const on = data.shortlist.includes(id);
+    set(d => ({ ...d, shortlist: on ? d.shortlist.filter(x => x !== id) : [...d.shortlist, id] }));
+    notify(on ? 'Removed from shortlist.' : 'Saved to your shortlist.');
+  };
+
+  return (
+    <div>
+      <div className="banner">
+        Showing scholarships for <strong>{p.name}</strong> · {(p.degree || 'Your course').split(' in ')[0]} ({p.year}) · {p.state} · Family income ≤ {inr(p.income)}
+        <a href="#/onboarding" className="link" style={{ marginLeft: 8 }}>Edit profile →</a>
+      </div>
+
+      <div className="mt-lg">
+        <PageHead eyebrow="Curated & calibrated" title="Discover Scholarships" subtitle="Matched against your academic profile and eligibility criteria." />
+      </div>
+
+      <Card>
+        <div className="filters">
+          <Field label="Search">
+            <input className="input" placeholder="Name, provider or stream…" value={query} onChange={e => setQuery(e.target.value)} />
+          </Field>
+          <Field label="Level">
+            <select className="input" value={level} onChange={e => setLevel(e.target.value)}>
+              <option>All</option><option>Undergraduate</option>
+            </select>
+          </Field>
+          <Field label="Scheme type">
+            <select className="input" value={type} onChange={e => setType(e.target.value)}>
+              {types.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </Field>
+          <Field label="Sort by">
+            <select className="input" value={sort} onChange={e => setSort(e.target.value)}>
+              <option value="match">Best match</option>
+              <option value="deadline">Deadline (earliest)</option>
+              <option value="amount">Award (highest)</option>
+            </select>
+          </Field>
+          <label className="check" style={{ minHeight: 44 }}>
+            <input type="checkbox" checked={onlyEligible} onChange={e => setOnlyEligible(e.target.checked)} />
+            Only eligible
+          </label>
+        </div>
+      </Card>
+
+      <p className="sm muted mt">{rows.length} scholarship{rows.length !== 1 ? 's' : ''} found</p>
+      {rows.length === 0 && <div className="mt"><Empty title="No scholarships match these filters" text="Clear the search or change a filter to see more." /></div>}
+
+      <div className="stack mt" style={{ '--gap': '18px' }}>
+        {rows.map(s => {
+          const saved = data.shortlist.includes(s.id);
+          return (
+            <Card key={s.id} className="hover">
+              <div className="scheme-top">
+                <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+                  <div className="tag-row">
+                    <Badge tone={s.el.ok ? 'ok' : 'warn'}>{s.el.ok ? 'Good match' : `${s.el.metCount}/${s.el.checks.length} criteria met`}</Badge>
+                    <Badge tone="neutral">{s.type}</Badge>
+                  </div>
+                  <h3 className="scheme-name">{s.name}</h3>
+                  <p className="scheme-prov">{s.provider}</p>
+                </div>
+                <div>
+                  <p className="amt">{s.amountLabel}</p>
+                  <p className="dl2">Deadline: {fmt(s.deadline)}</p>
+                </div>
+              </div>
+              <p className="note">
+                {s.el.ok
+                  ? `Matches your ${p.level.toLowerCase()} ${p.stream.toLowerCase()} enrollment and income ceiling of ${inr(s.maxIncome)}.`
+                  : s.el.checks.filter(c => !c.ok).map(c => `${c.label}: needs ${c.need}.`).join(' ')}
+              </p>
+              <div className="scheme-actions">
+                <Btn variant="ghost" size="sm" onClick={() => toggleShortlist(s.id)} aria-pressed={saved}>
+                  {saved ? '★ Saved' : '☆ Save scholarship'}
+                </Btn>
+                <LinkBtn href={`#/scheme/${s.id}`} variant="dark" size="sm">View details →</LinkBtn>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+      <p className="hint-foot mt-lg" style={{ borderRadius: 8 }}>Demo directory with illustrative criteria. Check official portals for final guidelines.</p>
+    </div>
+  );
+}
+
+/* =========================================================
+   9. SCHEME DETAILS + MISSING PIECE ENGINE
+   ========================================================= */
+function SchemeDetail({ id }) {
+  const { data, set, notify } = useApp();
+  const s = schemeById(id);
+  const p = data.profile;
+  if (!s) return <Empty title="Scholarship not found" text="It may have been removed from the directory." action={<LinkBtn href="#/discover">Back to discover</LinkBtn>} />;
+
+  const dg = diagnose(s, p, data.certs);
+  const firstMissing = dg.missing[0];
+  const saved = data.shortlist.includes(s.id);
+  const tracked = data.apps.find(a => a.schemeId === s.id);
+  const rdy = dg.total ? Math.round((dg.ready / dg.total) * 100) : 0;
+
+  const startApp = () => {
+    if (!tracked) {
+      set(d => ({ ...d, apps: [...d.apps, { id: uid(), schemeId: s.id, stage: 1, startedOn: todayISO(), note: 'Started from scheme details.' }] }));
+      notify('Application tracking started.');
+    }
+    window.location.hash = '#/applications';
+  };
+
+  const toggleSave = () => {
+    set(d => ({ ...d, shortlist: saved ? d.shortlist.filter(x => x !== s.id) : [...d.shortlist, s.id] }));
+    notify(saved ? 'Removed from shortlist.' : 'Saved to shortlist.');
+  };
+
+  const downloadTemplate = () => {
+    const text = [
+      'COLLEGE BONAFIDE CERTIFICATE — PRE-FILLED REQUEST FORMAT', '',
+      `Student name   : ${p.name}`,
+      `Degree         : ${p.degree}`,
+      `Year of study  : ${p.year}`,
+      `College        : ${p.college}`,
+      `Academic year  : ${acLabel()}`, '',
+      'To be completed by the college:',
+      'The above student is currently enrolled in this institution for the academic year stated.', '',
+      'Registrar / Dean signature: ____________________',
+      'Official college seal     : ____________________',
+      'Date                      : ____________________'
+    ].join('\n');
+    downloadBlob(text, 'bonafide_prefilled_format.txt', 'text/plain');
+    notify('Pre-filled format downloaded.');
+  };
+
+  const cur = tracked ? tracked.stage : (dg.el.ok && !firstMissing ? 2 : 1);
+
+  return (
+    <div>
+      <nav className="crumbs">
+        <a href="#/discover">Discover Scholarships</a> <span style={{ margin: '0 6px' }}>/</span> <span style={{ color: 'var(--espresso)' }}>{s.name}</span>
+      </nav>
+
+      <div className="detail-head">
+        <div style={{ minWidth: 0, flex: '1 1 480px' }}>
+          <h1 className="detail-title">{s.name}</h1>
+          <p className="detail-meta">Provider: <strong>{s.provider}</strong> · Award: <span className="amt">{s.amountLabel}</span> · Deadline: <strong>{fmt(s.deadline)}</strong></p>
+          <p className="lead muted" style={{ marginTop: 16, maxWidth: 680 }}>{s.summary}</p>
+        </div>
+        <div className="detail-actions">
+          <Btn variant="primary" onClick={startApp}>{tracked ? 'View in My Applications' : 'Start tracking application'}</Btn>
+          <Btn variant="ghost" onClick={toggleSave}>{saved ? '★ Saved to shortlist' : '☆ Save scholarship'}</Btn>
+        </div>
+      </div>
+
+      <div className="split mt-lg">
+        <div className="stack" style={{ '--gap': '24px' }}>
+          <div className="engine">
+            <span className="engine-title">! Missing Piece Engine</span>
+            <p className="sm muted" style={{ marginTop: 12 }}>
+              {!firstMissing
+                ? (dg.el.ok ? 'You have all required documents for this scholarship. Submit on the official portal before the deadline.' : 'Your documents are complete, but your academic profile does not meet every criterion.')
+                : `You are ${dg.missing.length} document${dg.missing.length > 1 ? 's' : ''} away from complete readiness.`}
+            </p>
+
+            {firstMissing && (
+              <div className="engine-cells">
+                <div className="engine-cell">
+                  <p className="h bad-text">What is missing?</p>
+                  <p className="b" style={{ fontWeight: 500 }}>{DOC_TYPES[firstMissing.type].label} {firstMissing.status === 'expired' ? 'is outdated or expired' : 'has not been uploaded'}.</p>
+                  <p className="f">{firstMissing.reason}</p>
+                </div>
+                <div className="engine-cell">
+                  <p className="h" style={{ color: 'var(--forest)' }}>Why is it needed?</p>
+                  <p className="b">{DOC_TYPES[firstMissing.type].why}</p>
+                </div>
+                <div className="engine-cell">
+                  <p className="h accent">What should you do next?</p>
+                  <p className="b">{DOC_TYPES[firstMissing.type].next}</p>
+                  <p className="f">Estimated completion: about 10 minutes.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="engine-actions">
+              {firstMissing && <LinkBtn href="#/documents">Upload document</LinkBtn>}
+              {firstMissing?.type === 'bonafide' && <Btn variant="ghost" onClick={downloadTemplate}>↓ Download pre-filled bonafide format (.txt)</Btn>}
+            </div>
+          </div>
+
+          <Card className="flush">
+            <div style={{ padding: 20, borderBottom: '1px solid var(--line)' }}>
+              <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Eligibility breakdown</p>
+              <p className="sm muted" style={{ marginTop: 4 }}>{dg.el.metCount} of {dg.el.checks.length} eligibility requirements met.</p>
+            </div>
+            <div className="table-wrap">
+              <table className="t" style={{ minWidth: 560 }}>
+                <thead><tr><th>Requirement</th><th>Criteria</th><th>Your profile</th><th>Status</th></tr></thead>
+                <tbody>
+                  {dg.el.checks.map(c => (
+                    <tr key={c.label}>
+                      <td style={{ fontWeight: 500 }}>{c.label}</td>
+                      <td className="muted">{c.need}</td>
+                      <td className="muted">{c.have}</td>
+                      <td><Badge tone={c.ok ? 'ok' : 'bad'}>{c.ok ? '✓ Met' : '✕ Not met'}</Badge></td>
+                    </tr>
+                  ))}
+                  {dg.docs.map(d => (
+                    <tr key={d.type}>
+                      <td style={{ fontWeight: 500 }}>{DOC_TYPES[d.type].label}</td>
+                      <td className="muted">Required document</td>
+                      <td className="muted">{d.reason}</td>
+                      <td><Badge tone={STATUS_TONE[d.status] || 'neutral'}>{STATUS_LABEL[d.status]}</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card>
+            <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Application roadmap</p>
+            <p className="sm muted" style={{ marginTop: 4, marginBottom: 16 }}>Five steps to complete your application.</p>
+            <ol className="steps five">
+              {s.steps.map((label, i) => {
+                const done = i < cur;
+                const active = i === cur;
+                return (
+                  <li key={label} className={`step ${done ? 'done' : ''} ${active ? 'active' : ''}`}>
+                    <div className="step-top">
+                      <span className="dot">{done ? '✓' : i + 1}</span>
+                      <span className="step-state">{done ? 'Completed' : active ? 'In progress' : 'Upcoming'}</span>
+                    </div>
+                    <p className="step-title">{label}</p>
+                  </li>
+                );
+              })}
+            </ol>
+          </Card>
+        </div>
+
+        <aside className="stack" style={{ '--gap': '20px' }}>
+          <Card>
+            <div className="between row">
+              <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Document readiness</p>
+              <Badge tone={rdy === 100 ? 'ok' : 'warn'}>{dg.ready} / {dg.total} ready</Badge>
+            </div>
+            <div style={{ marginTop: 12 }}><Progress value={rdy} tone={rdy === 100 ? 'ok' : 'terra'} /></div>
+            <div style={{ marginTop: 16 }}>
+              {dg.docs.map(d => (
+                <div key={d.type} className="ring-row">
+                  <span>{DOC_TYPES[d.type].label}</span>
+                  <Badge tone={STATUS_TONE[d.status] || 'neutral'}>{STATUS_LABEL[d.status]}</Badge>
+                </div>
+              ))}
+            </div>
+            <p className="xs muted" style={{ marginTop: 14 }}>GRANTLY checks completeness, format and dates. It does not verify official authenticity.</p>
+          </Card>
+
+          <Card>
+            <p className="serif" style={{ fontSize: 16, fontWeight: 600 }}>Apply on the official portal</p>
+            <p className="sm muted" style={{ marginTop: 8 }}>Applications are always completed on the provider’s own portal. Use “Start tracking” to log your progress here.</p>
+            <p className="xs muted" style={{ marginTop: 12 }}>Deadline: <strong style={{ color: 'var(--espresso)' }}>{fmt(s.deadline)}</strong> · {daysUntil(s.deadline)} days left</p>
+          </Card>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   10. DOCUMENT READINESS CENTRE (upload + date tracking)
+   ========================================================= */
+function Documents() {
+  const { data, set, notify } = useApp();
+  const [type, setType] = useState('income');
+  const [file, setFile] = useState(null);
+  const [issueDate, setIssueDate] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [submitErrors, setSubmitErrors] = useState([]);
+  const [drag, setDrag] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const inputRef = useRef(null);
+
+  const cfg = DOC_TYPES[type];
+  const suggestExpiry = (t, issue) => {
+    const days = DOC_TYPES[t].validityDays;
+    if (!days || !issue) return '';
+    const d = parseDate(issue);
+    d.setDate(d.getDate() + days);
+    return toISO(d);
+  };
+
+  const chooseFile = (f) => { if (f) { setFile(f); setSubmitErrors([]); } };
+  const onType = (t) => { setType(t); setExpiryDate(suggestExpiry(t, issueDate)); setSubmitErrors([]); };
+  const onIssue = (v) => { setIssueDate(v); setExpiryDate(suggestExpiry(type, v)); };
+
+  const preview = file ? validateUpload(file, type, issueDate, expiryDate) : null;
+
+  const save = async () => {
+    if (!file) { setSubmitErrors(['Choose a file to upload.']); return; }
+    const { errs, warns } = validateUpload(file, type, issueDate, expiryDate);
+    if (errs.length) { setSubmitErrors(errs); return; }
+    setSubmitErrors([]);
+    setBusy(true);
+    let dataUrl = null;
+    try { dataUrl = await readAsDataURL(file); } catch (e) { dataUrl = null; }
+    const cert = {
+      id: uid(), type, fileName: file.name, fileType: file.type, size: file.size,
+      issueDate, expiryDate: expiryDate || '', uploadedAt: todayISO(), dataUrl, sample: false
+    };
+    let stored = true;
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ ...data, certs: [...data.certs, cert] }));
+    } catch (e) {
+      stored = false;
+      cert.dataUrl = null;
+    }
+    set(d => ({ ...d, certs: [...d.certs, cert] }));
+    notify(
+      stored ? `${cfg.label} saved.` : 'Dates saved. The file was too large for browser storage, so only the details were kept.',
+      stored ? 'ok' : 'warn'
+    );
+    if (warns.length) setTimeout(() => notify(warns[0], 'warn'), 3500);
+    setBusy(false);
+    setFile(null); setIssueDate(''); setExpiryDate('');
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const clearFile = () => {
+    setFile(null); setSubmitErrors([]);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const removeCert = (id) => {
+    set(d => ({ ...d, certs: d.certs.filter(c => c.id !== id) }));
+    notify('Certificate removed.');
+  };
+
+  const updateExpiry = (id, value) => {
+    set(d => ({ ...d, certs: d.certs.map(c => (c.id === id ? { ...c, expiryDate: value } : c)) }));
+  };
+
+  const openFile = async (c) => {
+    if (!c.dataUrl) { notify('No file is stored for this record. Upload it again to view.', 'warn'); return; }
+    const blob = await (await fetch(c.dataUrl)).blob();
+    window.open(URL.createObjectURL(blob), '_blank');
+  };
+
+  const certs = data.certs
+    .map(c => ({ ...c, st: certStatus(c) }))
+    .sort((a, b) => (a.expiryDate || '9999').localeCompare(b.expiryDate || '9999'));
+  const requiredTypes = [...new Set(SCHEMES.flatMap(s => s.docs))];
+  const latestRows = requiredTypes.map(t => {
+    const c = latestCert(data.certs, t);
+    let status = c ? certStatus(c) : 'missing';
+    if (t === 'bonafide' && c && c.issueDate < acStart()) status = 'expired';
+    return { type: t, cert: c, status };
+  });
+  const counts = {
+    all: certs.length,
+    ready: certs.filter(c => c.st === 'valid').length,
+    attention: certs.filter(c => c.st === 'expiring' || c.st === 'expired').length,
+    missing: latestRows.filter(r => r.status === 'missing').length
+  };
+  const shown = certs.filter(c => filter === 'all' ? true : filter === 'ready' ? c.st === 'valid' : (c.st === 'expiring' || c.st === 'expired'));
+  const readyPct = Math.round((latestRows.filter(r => r.status === 'valid' || r.status === 'expiring').length / latestRows.length) * 100);
+
+  return (
+    <div>
+      <PageHead
+        eyebrow={`Pre-audit clearance · AY ${acLabel()}`}
+        title="Document Readiness Scanner"
+        subtitle="Upload certificates, track expiry dates, and see which documents are ready, missing or need attention before you apply."
+      />
+
+      <div className="doc-stats">
+        <Card>
+          <p className="stat-label">Readiness score</p>
+          <p className="stat-value">{readyPct}%</p>
+          <div style={{ marginTop: 12 }}><Progress value={readyPct} /></div>
+        </Card>
+        <Card><p className="stat-label">Ready</p><p className="stat-value ok-text">{counts.ready}</p></Card>
+        <Card><p className="stat-label">Needs attention</p><p className="stat-value warn-text">{counts.attention}</p></Card>
+        <Card><p className="stat-label">Missing (required)</p><p className="stat-value bad-text">{counts.missing}</p></Card>
+      </div>
+
+      <div className="banner mt">Your checklist compares uploaded files with the document requirements in GRANTLY’s sample scholarship catalogue. It checks file details and dates only — it does not verify document authenticity.</div>
+
+      <div className="split mt-lg">
+        <Card>
+          <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Upload a certificate</p>
+          <p className="sm muted" style={{ marginTop: 4 }}>Enter the dates printed on the certificate. GRANTLY tracks them and warns you before anything expires.</p>
+
+          <div
+            className={`dropzone mt ${drag ? 'active' : ''}`}
+            onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+            onDragLeave={() => setDrag(false)}
+            onDrop={(e) => { e.preventDefault(); setDrag(false); chooseFile(e.dataTransfer.files[0]); }}
+            onClick={() => inputRef.current?.click()}
+          >
+            <p className="t">{file ? file.name : 'Drag & drop a file here, or click to browse'}</p>
+            <p className="s">{file ? `${(file.size / 1024).toFixed(0)} KB selected` : 'PDF, JPG or PNG up to 2 MB · Passport photo up to 50 KB'}</p>
+            <input ref={inputRef} type="file" accept="application/pdf,image/jpeg,image/png" style={{ display: 'none' }} onChange={(e) => chooseFile(e.target.files[0])} />
+          </div>
+
+          <div className="upload-grid">
+            <Field label="Document type" required>
+              <select className="input" value={type} onChange={e => onType(e.target.value)}>
+                {Object.entries(DOC_TYPES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </Field>
+            <Field label="Issue date" required hint={cfg.mustBeCurrentAY ? `Must be on or after ${fmt(acStart())}` : 'Date printed on the certificate'}>
+              <input type="date" className="input" max={todayISO()} value={issueDate} onChange={e => onIssue(e.target.value)} />
+            </Field>
+            <Field label="Valid till / expiry" required={!!cfg.validityDays} hint={cfg.validityDays ? `Suggested: issue date + ${cfg.validityDays} days. Check your state rule.` : 'Leave blank if it does not expire.'}>
+              <input type="date" className="input" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} />
+            </Field>
+          </div>
+          <p className="xs muted" style={{ marginTop: 12 }}>{cfg.hint || `Issued by: ${cfg.issuer}`}</p>
+
+          {submitErrors.length > 0 && (
+            <div className="stack mt" style={{ '--gap': '8px' }}>
+              {submitErrors.map(e => <p key={e} className="alert-row alert-bad">✕ {e}</p>)}
+            </div>
+          )}
+          {!submitErrors.length && preview && (
+            <div className="stack mt" style={{ '--gap': '8px' }}>
+              {preview.errs.map(e => <p key={e} className="alert-row alert-bad">✕ {e}</p>)}
+              {preview.warns.map(w => <p key={w} className="alert-row alert-warn">! {w}</p>)}
+            </div>
+          )}
+
+          <div className="divider row between">
+            <Btn variant="ghost" disabled={!file} onClick={clearFile}>Clear file</Btn>
+            <Btn variant="primary" disabled={busy} onClick={save}>{busy ? 'Saving…' : 'Save certificate'}</Btn>
+          </div>
+        </Card>
+
+        <Card>
+          <p className="serif" style={{ fontSize: 16, fontWeight: 600 }}>Accepted formats</p>
+          <ul className="side-list mt" style={{ listStyle: 'none', padding: 0 }}>
+            <li>✓ PDF (recommended) or JPG / PNG</li>
+            <li>✓ Maximum 2 MB per document</li>
+            <li>✓ Passport photos under 50 KB</li>
+            <li>✓ Bank passbooks must show IFSC, account number and name</li>
+          </ul>
+          <p className="serif mt-lg" style={{ fontSize: 16, fontWeight: 600 }}>Common mistakes to avoid</p>
+          <ol className="side-list mt" style={{ paddingLeft: 0, listStyle: 'none' }}>
+            <li><strong>1. Outdated bonafide.</strong> Using last year’s certificate. Portals usually reject prior academic years.</li>
+            <li><strong>2. Blurry snapshots.</strong> Use a flat scanner app at about 200 DPI.</li>
+            <li><strong>3. Missing seal or signature.</strong> Certificates without the registrar’s signature and stamp fail audits.</li>
+          </ol>
+        </Card>
+      </div>
+
+      <Card className="mt-lg">
+        <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Your document readiness checklist</p>
+        <div className="mini-cards mt">
+          {latestRows.map(r => (
+            <div key={r.type} className="mini-card">
+              <div className="top">
+                <span className="n">{DOC_TYPES[r.type].label}</span>
+                <Badge tone={STATUS_TONE[r.status] || 'neutral'}>{STATUS_LABEL[r.status]}</Badge>
+              </div>
+              <p className="d">{r.cert ? `Issued ${fmt(r.cert.issueDate)}${r.cert.expiryDate ? ` · Valid till ${fmt(r.cert.expiryDate)}` : ''}` : 'No certificate uploaded yet.'}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="mt-lg">
+        <div className="between row" style={{ alignItems: 'flex-start' }}>
+          <div>
+            <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Document vault & date tracker</p>
+            <p className="sm muted" style={{ marginTop: 4 }}>Every uploaded certificate, with issue date, expiry date and time remaining.</p>
+          </div>
+          <div className="seg">
+            {[['all', `All (${counts.all})`], ['ready', `Ready (${counts.ready})`], ['attention', `Attention (${counts.attention})`]].map(([k, label]) => (
+              <button key={k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>{label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt">
+          {shown.length === 0 && <Empty title="No certificates here yet" text="Upload a certificate above and its dates will be tracked automatically." />}
+          {shown.map(c => {
+            const total = c.expiryDate ? Math.max(1, (parseDate(c.expiryDate) - parseDate(c.issueDate)) / 86400000) : 0;
+            const elapsed = c.expiryDate ? Math.min(100, Math.max(0, ((startOfToday() - parseDate(c.issueDate)) / 86400000 / total) * 100)) : 0;
+            const days = c.expiryDate ? daysUntil(c.expiryDate) : null;
+            const tone = STATUS_TONE[c.st];
+            const toneText = c.st === 'expired' ? 'bad' : c.st === 'expiring' ? 'warn' : 'ok';
+            return (
+              <div key={c.id} className="vault-item">
+                <div className="vault-body">
+                  <div className="vault-main">
+                    <div className="vault-title">
+                      <span className="n">{DOC_TYPES[c.type].label}</span>
+                      <Badge tone={tone}>{STATUS_LABEL[c.st]}</Badge>
+                      {c.sample && <Badge tone="neutral">Sample record</Badge>}
+                    </div>
+                    <p className="vault-file">{c.fileName} · {(c.size / 1024).toFixed(0)} KB · Uploaded {fmt(c.uploadedAt)}</p>
+                    <div className="vault-dates">
+                      <div><p className="k">Issued</p><p className="v">{fmt(c.issueDate)}</p></div>
+                      <div><p className="k">Valid till</p><p className="v">{c.expiryDate ? fmt(c.expiryDate) : 'No expiry'}</p></div>
+                      <div>
+                        <p className="k">Time remaining</p>
+                        <p className={`v ${toneText}`}>{days === null ? '—' : days < 0 ? `Expired ${Math.abs(days)} days ago` : `${days} days left`}</p>
+                      </div>
+                    </div>
+                    {c.expiryDate && (
+                      <div className="vault-bar">
+                        <Progress value={elapsed} tone={toneText} />
+                        <p className="vault-bar p">{Math.round(elapsed)}% of validity period used</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="vault-side">
+                    <label className="field">
+                      <span className="field-label">Update expiry date</span>
+                      <input type="date" className="input" value={c.expiryDate || ''} onChange={e => updateExpiry(c.id, e.target.value)} />
+                    </label>
+                    <div className="vault-side btn-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <Btn variant="ghost" size="sm" onClick={() => openFile(c)}>View file</Btn>
+                      <Btn variant="danger" size="sm" onClick={() => removeCert(c.id)}>Delete</Btn>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+/* =========================================================
+   11. MY APPLICATIONS
+   ========================================================= */
+function Applications() {
+  const { data, set, notify } = useApp();
+  const apps = data.apps;
+
+  const advance = (id) => {
+    set(d => ({ ...d, apps: d.apps.map(a => (a.id === id && a.stage < APP_STAGES.length ? { ...a, stage: a.stage + 1 } : a)) }));
+    notify('Stage marked complete.');
+  };
+  const remove = (id) => {
+    set(d => ({ ...d, apps: d.apps.filter(a => a.id !== id) }));
+    notify('Application removed from tracking.');
+  };
+  const exportCSV = () => {
+    const rows = [['Scholarship', 'Provider', 'Stage', 'Started', 'Deadline', 'Award']];
+    apps.forEach(a => {
+      const s = schemeById(a.schemeId);
+      if (s) rows.push([s.name, s.provider, a.stage >= APP_STAGES.length ? 'Completed' : APP_STAGES[a.stage], a.startedOn, s.deadline, s.amountLabel]);
+    });
+    downloadBlob(rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n'), 'grantly-applications.csv', 'text/csv');
+    notify('Ledger exported as CSV.');
+  };
+
+  const totalAid = apps.reduce((sum, a) => sum + (schemeById(a.schemeId)?.amount || 0), 0);
+  const action = apps.filter(a => a.stage < 3).length;
+
+  return (
+    <div>
+      <PageHead
+        eyebrow="Scholarship dossier · Lifecycle tracker"
+        title="My Applications"
+        subtitle="Track each scholarship from eligibility check to disbursement."
+        actions={<Btn variant="ghost" onClick={exportCSV} disabled={!apps.length}>Export ledger (CSV)</Btn>}
+      />
+
+      <div className="stat-trio">
+        <Card><p className="stat-label">Total tracked</p><p className="stat-value">{apps.length}</p><p className="stat-note">Active academic year</p></Card>
+        <Card><p className="stat-label">Action required</p><p className="stat-value warn-text">{action}</p><p className="stat-note">Applications before verification stage</p></Card>
+        <Card><p className="stat-label">Potential aid</p><p className="stat-value accent">{inr(totalAid)}</p><p className="stat-note">Combined award value</p></Card>
+      </div>
+
+      <div className="mt-lg">
+        {apps.length === 0 && <Empty title="No applications tracked" text="Open a scholarship and choose “Start tracking application”." action={<LinkBtn href="#/discover" variant="dark">Discover scholarships</LinkBtn>} />}
+        {apps.map(a => {
+          const s = schemeById(a.schemeId);
+          if (!s) return null;
+          const done = a.stage >= APP_STAGES.length;
+          return (
+            <Card key={a.id} className="app-block" style={{ marginBottom: 18 }}>
+              <div className="app-head">
+                <div style={{ minWidth: 0 }}>
+                  <p className="eyebrow-sm">{s.provider}</p>
+                  <h3>{s.name}</h3>
+                  <p className="xs muted" style={{ marginTop: 6 }}>Started {fmt(a.startedOn)} · Deadline {fmt(s.deadline)} ({daysUntil(s.deadline)} days) · {s.amountLabel}</p>
+                </div>
+                <Badge tone={done ? 'ok' : 'warn'}>{done ? 'Completed' : `Current: ${APP_STAGES[a.stage]}`}</Badge>
+              </div>
+
+              <div style={{ marginTop: 18 }}><Progress value={(a.stage / APP_STAGES.length) * 100} tone="terra" /></div>
+              <ol className="steps five" style={{ marginTop: 18 }}>
+                {APP_STAGES.map((label, i) => {
+                  const isDone = i < a.stage;
+                  const isCurrent = i === a.stage && !done;
+                  return (
+                    <li key={label} className={`step ${isDone ? 'done' : ''} ${isCurrent ? 'active' : ''}`}>
+                      <div className="step-top">
+                        <span className="dot">{isDone ? '✓' : i + 1}</span>
+                        <span className="step-state">{isDone ? 'Done' : isCurrent ? 'Now' : 'Next'}</span>
+                      </div>
+                      <p className="step-title">{label}</p>
+                    </li>
+                  );
+                })}
+              </ol>
+
+              <div className="app-foot">
+                <p className="sm muted">{a.note || 'No notes yet.'}</p>
+                <div className="row" style={{ gap: 8 }}>
+                  <Btn variant="danger" size="sm" onClick={() => remove(a.id)}>Stop tracking</Btn>
+                  <Btn variant="primary" size="sm" disabled={done} onClick={() => advance(a.id)}>{done ? 'Completed ✓' : 'Mark current stage complete'}</Btn>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      <Card className="mt-lg">
+        <p className="serif" style={{ fontSize: 16, fontWeight: 600 }}>Delays at college or district office?</p>
+        <p className="sm muted" style={{ marginTop: 8 }}>Ask your college to fast-track the bonafide. If verification stays stuck, contact the District Nodal Officer (DNO) for the scheme and request a written status update. Keep a copy of every application ID.</p>
+      </Card>
+    </div>
+  );
+}
+
+/* =========================================================
+   12. OPPORTUNITY RADAR & SHORTLIST
+   ========================================================= */
+function Radar() {
+  const { data, set, notify } = useApp();
+  const [sort, setSort] = useState('deadline');
+  const shortlisted = SCHEMES.filter(s => data.shortlist.includes(s.id));
+  const others = SCHEMES.filter(s => !data.shortlist.includes(s.id));
+  const closingWeek = shortlisted.filter(s => daysUntil(s.deadline) <= 7).length;
+  const urgent = [...shortlisted].sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 3);
+  const sorted = [...shortlisted].sort((a, b) => sort === 'amount' ? b.amount - a.amount : a.deadline.localeCompare(b.deadline));
+  const totalValue = shortlisted.reduce((s, x) => s + x.amount, 0);
+
+  const toggle = (id) => {
+    const on = data.shortlist.includes(id);
+    set(d => ({ ...d, shortlist: on ? d.shortlist.filter(x => x !== id) : [...d.shortlist, id] }));
+    notify(on ? 'Removed from shortlist.' : 'Added to shortlist.');
+  };
+
+  return (
+    <div>
+      <PageHead
+        eyebrow="Personalized academic radar"
+        title="Opportunity Radar & Shortlist"
+        subtitle="Stay on top of upcoming deadlines and saved scholarships."
+        actions={<>
+          <Btn variant="ghost" disabled={!shortlisted.length} onClick={() => { downloadICS(shortlisted); notify('Calendar file downloaded.'); }}>Export deadlines (.ics)</Btn>
+          <LinkBtn href="#/discover" variant="dark">+ Track new opportunity</LinkBtn>
+        </>}
+      />
+
+      <div className="stat-trio">
+        <Card><p className="stat-label">Shortlisted</p><p className="stat-value">{shortlisted.length}</p></Card>
+        <Card><p className="stat-label">Closing this week</p><p className="stat-value bad-text">{closingWeek}</p></Card>
+        <Card><p className="stat-label">Potential aid</p><p className="stat-value accent">{inr(totalValue)}</p></Card>
+      </div>
+
+      <div className="mt-lg">
+        <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Urgent closing deadlines</p>
+        <p className="sm muted" style={{ marginTop: 4 }}>Prioritize applications closing soonest to avoid portal lockouts.</p>
+        <div className="urgent-grid">
+          {urgent.length === 0 && <div style={{ gridColumn: '1 / -1' }}><Empty title="Your shortlist is empty" text="Save scholarships from Discover to see their deadlines here." /></div>}
+          {urgent.map(s => {
+            const d = daysUntil(s.deadline);
+            return (
+              <Card key={s.id} className={`urgent-card ${d <= 7 ? 'alert' : ''}`}>
+                <div className="between row">
+                  <Badge tone={d <= 7 ? 'bad' : d <= 20 ? 'warn' : 'neutral'}>Closes in {d} days</Badge>
+                  <span className="xs muted">{fmt(s.deadline)}</span>
+                </div>
+                <h3>{s.name}</h3>
+                <p className="prov">{s.provider}</p>
+                <p className="amt">{s.amountLabel}</p>
+                <LinkBtn href={`#/scheme/${s.id}`} variant="ghost">Check missing pieces</LinkBtn>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      <Card className="flush mt-lg">
+        <div className="table-head">
+          <div>
+            <h3>Your shortlisted scholarships ({shortlisted.length})</h3>
+            <p>Curated from your profile and eligibility.</p>
+          </div>
+          <label className="row" style={{ gap: 8, fontSize: 14 }}>
+            <span className="muted">Sort by</span>
+            <select value={sort} onChange={e => setSort(e.target.value)}>
+              <option value="deadline">Deadline (earliest)</option>
+              <option value="amount">Award (highest)</option>
+            </select>
+          </label>
+        </div>
+        {sorted.length === 0
+          ? <div style={{ padding: 20 }}><Empty title="Nothing shortlisted" text="Save scholarships from the Discover page to build your shortlist." /></div>
+          : (
+            <div className="table-wrap">
+              <table className="t wide">
+                <thead>
+                  <tr><th>Scholarship & provider</th><th>Award</th><th>Deadline & countdown</th><th>Eligibility</th><th style={{ textAlign: 'right' }}>Actions</th></tr>
+                </thead>
+                <tbody>
+                  {sorted.map(s => {
+                    const el = eligibility(s, data.profile);
+                    const d = daysUntil(s.deadline);
+                    return (
+                      <tr key={s.id}>
+                        <td>
+                          <p className="serif" style={{ fontWeight: 600 }}>{s.name}</p>
+                          <p className="xs muted">{s.provider}</p>
+                        </td>
+                        <td className="accent">{s.amountLabel}</td>
+                        <td className="num">
+                          <p>{fmt(s.deadline)}</p>
+                          <p className={`xs ${d <= 7 ? 'bad-text' : 'muted'}`}>{d} days left</p>
+                        </td>
+                        <td><Badge tone={el.ok ? 'ok' : 'warn'}>{el.ok ? 'Good match' : `${el.metCount}/${el.checks.length} met`}</Badge></td>
+                        <td>
+                          <div className="row end" style={{ gap: 8 }}>
+                            <a href={`#/scheme/${s.id}`} className="btn btn-ghost btn-sm">View</a>
+                            <Btn variant="danger" size="sm" onClick={() => toggle(s.id)}>Remove</Btn>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+      </Card>
+
+      <div className="split mt-lg">
+        <Card>
+          <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Future opportunity pipeline</p>
+          <p className="sm muted" style={{ marginTop: 4 }}>Schemes you have not saved yet. Add them to track their deadlines.</p>
+          <ul className="pipe-list">
+            {others.length === 0 && <li className="sm muted">You have saved every scheme in the directory.</li>}
+            {others.map(s => (
+              <li key={s.id}>
+                <div style={{ minWidth: 0 }}>
+                  <p className="n">{s.name}</p>
+                  <p className="d">Deadline {fmt(s.deadline)} · {s.amountLabel}</p>
+                </div>
+                <Btn variant="ghost" size="sm" onClick={() => toggle(s.id)}>+ Save</Btn>
+              </li>
+            ))}
+          </ul>
+        </Card>
+        <Card>
+          <p className="serif" style={{ fontSize: 18, fontWeight: 600 }}>Next 60 days</p>
+          <p className="sm muted" style={{ marginTop: 4 }}>Shortlisted deadlines in order.</p>
+          <ul className="cal-list">
+            {[...shortlisted].filter(s => daysUntil(s.deadline) <= 60).sort((a, b) => a.deadline.localeCompare(b.deadline)).map(s => (
+              <li key={s.id}>
+                <span className="d">{fmt(s.deadline)}</span>
+                <span className="dot2" />
+                <span className="n">{s.name}</span>
+              </li>
+            ))}
+            {shortlisted.filter(s => daysUntil(s.deadline) <= 60).length === 0 && <li className="sm muted">No shortlisted deadlines in the next 60 days.</li>}
+          </ul>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   13. ASK GRANTLY
+   ========================================================= */
+function Ask() {
+  const { data, set } = useApp();
+  const [text, setText] = useState('');
+  const endRef = useRef(null);
+  const chat = data.chat;
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chat.length]);
+
+  const send = (msg) => {
+    const q = (msg ?? text).trim();
+    if (!q) return;
+    const reply = counselorReply(q, data.profile);
+    set(d => ({ ...d, chat: [...d.chat, { role: 'user', text: q }, { role: 'bot', text: reply }] }));
+    setText('');
+  };
+
+  const suggestions = [
+    'Why is my bonafide certificate marked incomplete?',
+    'How do I get a bonafide letter from my college?',
+    'What happens if my income certificate expires during review?',
+    'What kind of questions are in the aptitude test?',
+    'Are the photo requirements strict?'
+  ];
+
+  const dg = diagnose(SCHEMES[0], data.profile, data.certs);
+  const pct = Math.round((dg.ready / dg.total) * 100);
+
+  return (
+    <div>
+      <PageHead eyebrow="Personal scholarship advisor" title="Ask GRANTLY" subtitle="Clear, personalized answers about scholarship criteria, required documents and application steps." />
+
+      <div className="split-wide">
+        <div className="stack ask-side" style={{ '--gap': '20px' }}>
+          <Card>
+            <p className="stat-label">Dossier health</p>
+            <p className="stat-value">{pct}%</p>
+            <p className="xs muted" style={{ marginTop: 4 }}>Verified for {SCHEMES[0].name.split(' Undergraduate')[0]}</p>
+            <div style={{ marginTop: 12 }}><Progress value={pct} /></div>
+            <p className="sm muted" style={{ marginTop: 12 }}>{dg.missing.length ? `${dg.missing.length} item${dg.missing.length > 1 ? 's' : ''} need action.` : 'Nothing needs action.'}</p>
+          </Card>
+          <Card>
+            <p className="serif" style={{ fontSize: 16, fontWeight: 600 }}>Popular questions</p>
+            <div className="suggest">
+              {suggestions.map(s => <button key={s} onClick={() => send(s)}>{s}</button>)}
+            </div>
+          </Card>
+        </div>
+
+        <Card className="chat-card">
+          <div className="chat-head">
+            <div>
+              <p className="n">GRANTLY Counselor</p>
+              <p className="s">Calibrated to your active dossier · {(data.profile.college || 'your institution').split(' (')[0]}</p>
+            </div>
+            {chat.length > 0 && <Btn variant="ghost" size="sm" onClick={() => set(d => ({ ...d, chat: [] }))}>Clear chat</Btn>}
+          </div>
+
+          <div className="chat-log">
+            {chat.length === 0 && (
+              <div className="chat-welcome">
+                <p><strong>Hello, {(data.profile.name || 'there').split(' ')[0]}.</strong></p>
+                <p style={{ marginTop: 6 }}>Ask about a rejected document, a deadline, the aptitude test, or what to do next. Choose a question on the left or type your own below.</p>
+              </div>
+            )}
+            {chat.map((m, i) => <div key={i} className={`bubble ${m.role}`}>{m.text}</div>)}
+            <div ref={endRef} />
+          </div>
+
+          <form className="chat-form" onSubmit={(e) => { e.preventDefault(); send(); }}>
+            <input className="input" placeholder="Ask about a scholarship, document or deadline…" value={text} onChange={e => setText(e.target.value)} />
+            <Btn variant="primary" type="submit" disabled={!text.trim()}>Send</Btn>
+          </form>
+          <p className="chat-foot">General guidance only. Confirm final rules on each official portal. Your uploaded records stay in this browser.</p>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   14. REACT INTELLIGENCE FEATURES
+   ========================================================= */
+function SmartMatchCenter() {
+  const { data } = useApp();
+  const p = data.profile;
+  const rows = SCHEMES.map(s => ({ scheme:s, result:eligibility(s,p), diagnosis:diagnose(s,p,data.certs) }))
+    .sort((a,b) => b.result.metCount-a.result.metCount || a.scheme.deadline.localeCompare(b.scheme.deadline));
+  return <div>
+    <PageHead eyebrow="Personalized scholarship intelligence" title="Smart Scholarship Match" subtitle="See which published sample opportunities align with the details in your student profile — and understand every requirement." actions={<LinkBtn href="#/onboarding" variant="ghost">Update profile</LinkBtn>} />
+    <div className="banner">Matching uses your saved profile. A match is a screening aid, not a guarantee of selection. Always confirm current rules with the official provider.</div>
+    <div className="stack mt-lg" style={{'--gap':'16px'}}>
+      {rows.map(({scheme:s,result:r,diagnosis:d}) => <Card key={s.id}>
+        <div className="between row" style={{alignItems:'flex-start',gap:18}}>
+          <div style={{minWidth:0}}><div className="tag-row"><Badge tone={r.metCount===r.checks.length?'ok':'warn'}>{r.metCount===r.checks.length?'All listed checks met':`${r.metCount} of ${r.checks.length} checks met`}</Badge><Badge>{s.type}</Badge></div><h3 className="scheme-name">{s.name}</h3><p className="scheme-prov">{s.provider}</p></div>
+          <div style={{textAlign:'right',flexShrink:0}}><p className="amt">{s.amountLabel}</p><p className="xs muted">Deadline {fmt(s.deadline)}</p></div>
+        </div>
+        <div className="criteria-list">{r.checks.map((c,i)=><div className="criteria-item" key={i}><div><strong>{c.label}</strong><div className="xs muted">Required: {c.need} · Your profile: {c.have || 'Not provided'}</div></div><Badge tone={c.ok?'ok':'warn'}>{c.ok?'Matched':'Review'}</Badge></div>)}</div>
+        {d.missing.length>0 && <p className="sm muted" style={{marginTop:12}}>Documents to prepare: {d.missing.map(x=>DOC_TYPES[x.type]?.label || x.type).join(', ')}.</p>}
+        <div className="row mt" style={{gap:10,flexWrap:'wrap'}}><LinkBtn href={`#/scheme/${s.id}`} size="sm">View scholarship details</LinkBtn><LinkBtn href={`#/simulator?scheme=${s.id}`} variant="outline" size="sm">Explore what-if changes</LinkBtn></div>
+      </Card>)}
+    </div>
+  </div>;
+}
+
+function WhatIfSimulator() {
+  const { data } = useApp();
+  const p = data.profile;
+  const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const initial = schemeById(params.get('scheme')) || SCHEMES[0];
+  const [schemeId,setSchemeId] = useState(initial.id);
+  const [income,setIncome] = useState(String(p.income || ''));
+  const [cgpa,setCgpa] = useState(String(p.cgpa || ''));
+  const [stream,setStream] = useState(p.stream || 'Engineering');
+  const [level,setLevel] = useState(p.level || 'Undergraduate');
+  const scheme = schemeById(schemeId) || SCHEMES[0];
+  const simulated = {...p,income:income===''?NaN:Number(income),cgpa:cgpa===''?NaN:Number(cgpa),stream,level};
+  const actual = eligibility(scheme,p);
+  const trial = eligibility(scheme,simulated);
+  const complete = income!=='' && cgpa!=='' && !!stream && !!level;
+  const changed = ['income','cgpa','stream','level'].some(k=>String(simulated[k]??'')!==String(p[k]??''));
+  return <div>
+    <PageHead eyebrow="Explore possibilities safely" title="What-If Scholarship Simulator" subtitle="Try different study or income scenarios to understand how requirements may change. Your saved student profile will not be edited." actions={<Btn variant="ghost" onClick={()=>{setIncome(String(p.income||''));setCgpa(String(p.cgpa||''));setStream(p.stream||'Engineering');setLevel(p.level||'Undergraduate');}}>Reset to my profile</Btn>} />
+    <div className="insight-grid mt-lg">
+      <Card>
+        <p className="serif" style={{fontSize:18,fontWeight:600}}>Explore a scenario</p>
+        <p className="xs muted" style={{margin:'6px 0 18px'}}>Change the values below to see how this sample scheme's screening criteria respond.</p>
+        <div className="stack" style={{'--gap':'14px'}}>
+          <Field label="Scholarship"><select className="input" value={schemeId} onChange={e=>setSchemeId(e.target.value)}>{SCHEMES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
+          <div className="sim-controls">
+            <Field label="Annual family income (₹)"><input className="input" type="number" min="0" value={income} onChange={e=>setIncome(e.target.value)} placeholder="e.g. 250000" /></Field>
+            <Field label="Current CGPA"><input className="input" type="number" min="0" max="10" step="0.1" value={cgpa} onChange={e=>setCgpa(e.target.value)} placeholder="e.g. 8.0" /></Field>
+            <Field label="Education level"><select className="input" value={level} onChange={e=>setLevel(e.target.value)}><option>Undergraduate</option><option>Postgraduate</option><option>Higher Secondary</option></select></Field>
+            <Field label="Study stream"><select className="input" value={stream} onChange={e=>setStream(e.target.value)}>{STREAM_OPTIONS.map(x=><option key={x}>{x}</option>)}</select></Field>
+          </div>
+        </div>
+        <p className="xs muted" style={{marginTop:16}}>This is a hypothetical comparison only. Never change or misrepresent official application information.</p>
+      </Card>
+      <Card>
+        <p className="serif" style={{fontSize:18,fontWeight:600}}>Scenario result</p>
+        <p className="sm muted" style={{marginTop:6}}>{scheme.name}</p>
+        {!complete ? <div className="empty mt"><h3>Add your scenario details</h3><p>Enter income and CGPA to calculate the comparison.</p></div> : <>
+          <div className="sim-result"><p className="xs muted">HYPOTHETICAL SCREENING</p><h2 style={{fontFamily:'Domine,Georgia,serif',fontSize:26,margin:'4px 0'}}>{trial.metCount} of {trial.checks.length} checks matched</h2><Badge tone={trial.ok?'ok':'warn'}>{trial.ok?'All listed checks met':'Some requirements need review'}</Badge></div>
+          <div className="criteria-list">{trial.checks.map((c,i)=><div className="criteria-item" key={i}><span>{c.label}</span><Badge tone={c.ok?'ok':'warn'}>{c.ok?'Matched':'Not matched'}</Badge></div>)}</div>
+          <p className="sm" style={{marginTop:14}}><strong>Compared with your saved profile:</strong> {changed?'You are viewing a changed hypothetical scenario.':'These values currently match your saved profile.'}</p>
+          <p className="xs muted" style={{marginTop:8}}>The result only checks the limited criteria represented in this demo dataset. It is not an approval prediction or an official eligibility decision.</p>
+        </>}
+      </Card>
+    </div>
+    <Card className="mt-lg"><p className="serif" style={{fontSize:17,fontWeight:600}}>If this opportunity isn't a match</p><p className="sm muted" style={{marginTop:6}}>Explore other listed scholarships rather than changing your real details to fit a scheme.</p><LinkBtn href="#/matches" className="mt" size="sm">Compare other scholarships</LinkBtn></Card>
+  </div>;
+}
+
+/* =========================================================
+   14. ROOT: ROUTER, STATE, TOAST
+   ========================================================= */
+function useRoute() {
+  const parse = () => {
+    const raw = window.location.hash.replace(/^#/, '') || '/';
+    const [path, qs] = raw.split('?');
+    return { path: path || '/', params: new URLSearchParams(qs || ''), raw };
+  };
+  const [route, setRoute] = useState(parse);
+  useEffect(() => {
+    const onChange = () => setRoute(parse());
+    window.addEventListener('hashchange', onChange);
+    return () => window.removeEventListener('hashchange', onChange);
+  }, []);
+  return route;
+}
+
+function Root() {
+  const route = useRoute();
+  const [data, setData] = useState(loadData);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* storage full: keep in memory */ }
+  }, [data]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3200);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const ctx = { data, set: setData, notify: (msg, tone = 'ok') => setToast({ msg, tone, id: Date.now() }) };
+  const { path, params, raw } = route;
+
+  let page;
+  if (path === '/onboarding') page = <Onboarding key={raw} />;
+  else if (path === '/' || path === '') page = <Landing key={raw} />;
+  else {
+    let view;
+    if (path === '/dashboard') view = <Dashboard key={raw} />;
+    else if (path === '/discover') view = <Discover key={raw} params={params} />;
+    else if (path === '/matches') view = <SmartMatchCenter key={raw} />;
+    else if (path === '/simulator') view = <WhatIfSimulator key={raw} />;
+    else if (path.startsWith('/scheme/')) view = <SchemeDetail key={raw} id={path.split('/')[2]} />;
+    else if (path === '/documents') view = <Documents key={raw} />;
+    else if (path === '/applications') view = <Applications key={raw} />;
+    else if (path === '/radar') view = <Radar key={raw} />;
+    else if (path === '/ask') view = <Ask key={raw} />;
+    else view = <Empty title="Page not found" text="The page you are looking for does not exist." action={<LinkBtn href="#/dashboard">Go to dashboard</LinkBtn>} />;
+    page = <Shell path={path}>{view}</Shell>;
+  }
+
+  return (
+    <AppCtx.Provider value={ctx}>
+      {page}
+      {toast && (
+        <div key={toast.id} role="status" className={`toast ${toast.tone === 'warn' ? 'warn' : ''}`}>{toast.msg}</div>
+      )}
+    </AppCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+</script>
+</body>
+</html>
